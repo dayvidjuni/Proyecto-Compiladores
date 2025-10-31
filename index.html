@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Novela Visual (Avanzada)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="container">
+        <div id="editor-container">
+            <h2>Pega tu script (.game) aquí:</h2>
+            <textarea id="script-input" rows="15" placeholder="game &quot;Mi Juego&quot; {\n    scene inicio {\n        dialogue prota &quot;Hola Mundo&quot;\n    }\n    main {\n        inicio;\n    }\n}"></textarea>
+            <button id="load-script-btn">Cargar y Jugar</button>
+        </div>
+
+        <div id="game-screen" style="display: none;">
+            <div id="dialogue-box">
+                <div id="speaker-name"></div>
+                <div id="dialogue-text"></div>
+                <div id="choice-buttons"></div>
+            </div>
+            <button id="continue-btn">Continuar</button>
+        </div>
+    </div> <script src="compiler.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

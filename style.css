@@ -1,0 +1,52 @@
+/* Estilos añadidos para el editor */
+#container {
+    display: flex;
+    flex-direction: column; /* Coloca el editor encima del juego */
+    align-items: center;
+    gap: 20px; /* Espacio entre editor y juego */
+}
+
+#editor-container {
+    width: 800px;
+    padding: 20px;
+    background-color: #444;
+    border: 1px solid #666;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+#editor-container h2 {
+    margin-top: 0;
+    color: #eee;
+}
+
+#script-input {
+    width: 98%;
+    margin-bottom: 10px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 0.9em;
+    background-color: #222;
+    color: #ddd;
+    border: 1px solid #555;
+    border-radius: 4px;
+    resize: vertical; /* Permite redimensionar verticalmente */
+}
+
+#load-script-btn {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    cursor: pointer;
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    align-self: flex-end; /* Alinea el botón a la derecha */
+}
+
+#load-script-btn:hover {
+    background-color: #45a049;
+}
+
+/* El resto de tus estilos para #game-screen, #dialogue-box, etc. van aquí */
