@@ -1,0 +1,104 @@
+game "Las Pruebas Elementales" {
+    # --- DECLARACIONES ---
+    character prota "Valeria" (sprite: "heroina.png")
+    character espiritu "Espíritu Ancestral" (sprite: "anciano.png")
+
+    flag prueba_fuego_superada: false
+    flag prueba_agua_superada: false
+
+    # --- ESCENAS ---
+
+    scene sala_central {
+        background "bosque.jpg" # Simula una sala central
+        show prota at center
+        dialogue prota "Estoy en una sala circular con tres puertas."
+        dialogue prota "Una tiene el grabado de una llama. La otra, una ola. La del centro es de oro macizo."
+
+        if (prueba_fuego_superada) {
+            dialogue prota "(La puerta de la llama ahora tiene una luz azulada... ya no puedo entrar)."
+        }
+
+        if (prueba_agua_superada) {
+            dialogue prota "(La puerta de la ola también brilla con una luz azulada)."
+        }
+
+        choice {
+            "Ir a la Puerta del Fuego." -> {
+                goto sala_fuego;
+            }
+            "Ir a la Puerta del Agua." -> {
+                goto sala_agua;
+            }
+            "Intentar abrir la Puerta Dorada." -> {
+                goto puerta_final;
+            }
+        }
+    }
+
+    scene sala_fuego {
+        background "bosque_oscuro.jpg" # Simula la sala de fuego
+        show espiritu at right
+        dialogue espiritu "Para pasar la prueba del fuego, debes mostrar coraje."
+        dialogue espiritu "Cruza las llamas sin temor."
+
+        choice {
+            "Cruzar sin dudar." -> {
+                dialogue prota "Confío en la prueba. ¡Allá voy!"
+                set flag prueba_fuego_superada = true
+                dialogue espiritu "Bien hecho. Tu valor es auténtico. Vuelve a la sala principal."
+                goto sala_central; # El jugador es devuelto a la sala central
+            }
+            "Dudar y retroceder." -> {
+                dialogue prota "Es demasiado peligroso. No puedo hacerlo."
+                dialogue espiritu "El miedo te domina. Vuelve cuando estés listo."
+                goto sala_central; # El jugador es devuelto a la sala central
+            }
+        }
+    }
+
+    scene sala_agua {
+        background "bosque_oscuro.jpg" # Simula la sala de agua
+        show espiritu at right
+        dialogue espiritu "La prueba del agua requiere paciencia. Espera a que la marea baje."
+        dialogue prota "El agua está muy alta... ¿cuánto debo esperar?"
+
+        choice {
+            "Esperar pacientemente." -> {
+                dialogue prota "Seré paciente. Observaré el flujo del agua."
+                set flag prueba_agua_superada = true
+                dialogue espiritu "La paciencia es una virtud. Has superado la prueba. Vuelve."
+                goto sala_central; # El jugador es devuelto a la sala central
+            }
+            "Intentar cruzar nadando." -> {
+                dialogue prota "No tengo tiempo para esto. ¡Nadaré!"
+                dialogue espiritu "La impaciencia te arrastra. Vuelve a intentarlo."
+                goto sala_central; # El jugador es devuelto a la sala central
+            }
+        }
+    }
+
+    scene puerta_final {
+        background "bosque.jpg"
+        show espiritu at center
+
+        if (prueba_fuego_superada) {
+            if (prueba_agua_superada) {
+                dialogue espiritu "Has demostrado coraje y paciencia. Eres digno."
+                dialogue prota "La puerta dorada se abre... ¡Lo logré!"
+            } else {
+                dialogue espiritu "Aún te falta superar la prueba del agua."
+                goto sala_central; # Devuelve al jugador si le falta una prueba
+            }
+        } else {
+            dialogue espiritu "Aún te falta superar la prueba del fuego."
+            goto sala_central; # Devuelve al jugador si le falta una prueba
+        }
+    }
+
+    # --- FLUJO PRINCIPAL ---
+    main {
+        sala_central;
+        # El resto del juego se maneja con los 'goto' dentro de las escenas.
+        # El main solo necesita iniciar la primera escena.
+    }
+}
