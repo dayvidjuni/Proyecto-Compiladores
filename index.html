@@ -10,11 +10,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Main Navigation Bar (Vertical Sidebar) -->
     <nav id="main-nav">
         <div class="nav-top">
             <button class="nav-btn active" data-view="editor" title="Editor">
                 <span class="nav-icon">&lt;/&gt;</span>
+            </button>
+            <button class="nav-btn" data-view="analysis" title="Análisis IA">
+                <span class="nav-icon">🧠</span>
             </button>
             <button class="nav-btn" data-view="community" title="Comunidad">
                 <span class="nav-icon">🌐</span>
@@ -30,267 +32,188 @@
         </div>
     </nav>
 
-    <!-- Main App Content -->
     <div id="app-content">
 
-        <!-- View 1: Editor (Default View) -->
         <div id="view-editor" class="view view-active">
             <div class="editor-grid">
-                <!-- Project Panel -->
+                
                 <div id="project-panel" class="panel">
                     <div class="panel-header">
                         <h3>Proyecto</h3>
                     </div>
                     <div class="panel-content">
                         <div class="file-tree">
-                            <div class="file-item">
-                                <span class="file-icon">📄</span>
-                                <span>script.game</span>
-                            </div>
-                            <div class="file-item">
-                                <span class="file-icon">🖼️</span>
-                                <span>assets</span>
-                            </div>
-                            <div class="file-item">
-                                <span class="file-icon">🔊</span>
-                                <span>audio</span>
-                            </div>
+                            <div class="file-item"><span class="file-icon">📄</span><span>script.game</span></div>
+                            <div class="file-item"><span class="file-icon">🖼️</span><span>assets</span></div>
+                            <div class="file-item"><span class="file-icon">🔊</span><span>audio</span></div>
                         </div>
-                        <hr style="margin: 15px 0; border: none; border-top: 1px solid #444;">
-                        <h4 style="margin-top: 15px; margin-bottom: 10px; font-size: 12px; text-transform: uppercase; color: #888;">Gestor de Assets</h4>
+                        <hr style="margin: 15px 0; border: none; border-top: 1px solid #333;">
+                        <h4>Gestor de Assets</h4>
                         <input type="text" id="asset-url-input" placeholder="Link de imagen/audio..." class="asset-input">
                         <button id="asset-url-btn" class="asset-btn">Usar Link</button>
-                        <div style="text-align: center; margin: 10px 0; font-size: 10px; color: #666;">--- O ---</div>
-                        <label for="asset-file-input" class="asset-btn">
-                            📁 Subir
-                        </label>
+                        <label for="asset-file-input" class="asset-btn" style="margin-top:5px; display:block; text-align:center;">📁 Subir Archivo</label>
                         <input type="file" id="asset-file-input" accept="image/*, audio/*" style="display: none;">
-                        <div id="asset-output-container" style="display:none; margin-top: 10px; padding: 10px; background: linear-gradient(135deg, var(--secondary-dark), var(--tertiary-dark)); border: 1px solid var(--accent-neon); border-radius: 4px; box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);">
-                            <p style="font-size: 10px; margin: 0 0 5px 0; color: var(--accent-neon); text-transform: uppercase; font-weight: 700;">✓ Listo</p>
+                        <div id="asset-output-container" style="display:none; margin-top: 10px; padding: 10px; background: #222; border: 1px solid var(--accent-neon);">
+                            <p style="font-size: 10px; margin: 0; color: var(--accent-neon);">✓ URL Copiada:</p>
                             <code id="asset-output-text" style="font-size: 10px; word-break: break-all; color: var(--accent-cyan);"></code>
                         </div>
                     </div>
                 </div>
 
-                <!-- Code Panel -->
                 <div id="code-panel" class="panel">
                     <div class="panel-header">
-                        <h3>Editor de Script</h3>
+                        <h3>script.game</h3>
                         <button id="load-script-btn" class="compile-btn">▶ Compilar</button>
                     </div>
-                    <div class="panel-content editor-wrapper">
-                        <div class="code-editor">
-                            <div class="line-numbers" id="line-numbers"></div>
-                            <textarea id="script-input" placeholder='game "Mi Novela Visual" {&#10;    scene inicio {&#10;        personaje: "Lorem ipsum dolor sit amet"&#10;    }&#10;}'></textarea>
+                    <div class="panel-content" style="padding:0;">
+                        <div class="editor-wrapper">
+                            <div class="line-numbers" id="line-numbers">1</div>
+                            <div class="code-container">
+                                <pre id="syntax-highlight" aria-hidden="true"></pre>
+                                <textarea id="script-input" spellcheck="false" placeholder="Escribe tu código aquí...">
+game "Demo" {
+    scene inicio {
+        dialogue alice "Hola, bienvenido al motor."
+        choice {
+            "Ir al bosque" -> { goto bosque; }
+            "Quedarse" -> { dialogue alice "Nos quedamos."; }
+        }
+    }
+    scene bosque {
+        dialogue alice "Esto es un bosque oscuro."
+    }
+}</textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Preview Panel -->
-                <div id="preview-panel" class="panel">
-                    <div class="panel-header">
-                        <h3>Preview</h3>
-                    </div>
-                    <div class="panel-content">
+                <div id="right-split-panel" class="panel">
+                    
+                    <div id="preview-section">
+                        <div class="panel-header">
+                            <h3>Vista Previa</h3>
+                            <div class="preview-controls">
+                                <button id="btn-undo" class="control-btn" title="Atrás">←</button>
+                                <button id="btn-redo" class="control-btn" title="Adelante">→</button>
+                            </div>
+                        </div>
                         <div id="game-screen">
                             <div id="character-layer"></div>
                             <div id="dialogue-box">
                                 <div id="speaker-name"></div>
-                                <div id="dialogue-text"></div>
+                                <div id="dialogue-text">Pulsa Compilar para iniciar...</div>
                                 <div id="choice-buttons"></div>
                                 <button id="continue-btn">→</button>
                             </div>
                         </div>
                     </div>
+
+                    <div id="flow-section">
+                        <div class="panel-header" style="border-top: 1px solid #333;">
+                            <h3>Mapa de Flujo</h3>
+                            <span style="font-size: 10px; color: #666;">Auto-actualizable</span>
+                        </div>
+                        <div id="mini-map-container">
+                            <div id="mermaid-chart-mini" class="mermaid">
+                                graph TD; A[Código] --> B(Compilar) --> C{Jugar};
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
 
-        <!-- View 2: Community -->
-        <div id="view-community" class="view">
-            <div class="view-header">
-                <h1>Explorar Creaciones</h1>
+        <div id="view-analysis" class="view">
+            <div class="analysis-layout">
+                <div class="analysis-header">
+                    <h1>Análisis Narrativo Avanzado</h1>
+                    <button id="btn-run-analysis" class="compile-btn">🤖 Ejecutar Diagnóstico</button>
+                </div>
+                <div class="analysis-content">
+                    <div class="stats-panel">
+                        <h3 style="color: var(--accent-magenta); margin-bottom: 15px;">Métricas</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                            <div class="stat-card"><div id="stat-words" style="font-size: 20px; font-weight:bold; color:var(--accent-neon)">0</div><small>Palabras</small></div>
+                            <div class="stat-card"><div id="stat-scenes" style="font-size: 20px; font-weight:bold; color:var(--accent-cyan)">0</div><small>Escenas</small></div>
+                            <div class="stat-card"><div id="stat-choices" style="font-size: 20px; font-weight:bold; color:var(--accent-magenta)">0</div><small>Decisiones</small></div>
+                            <div class="stat-card"><div id="stat-endings" style="font-size: 20px; font-weight:bold; color:var(--accent-orange)">0</div><small>Finales</small></div>
+                        </div>
+                        <h4 style="color: #ff4444; border-bottom: 1px solid #333;">Errores Críticos</h4>
+                        <ul id="list-errors" style="font-size:11px; color:#ff6666; list-style:none; padding:0; margin-top:5px;">
+                            <li>Esperando análisis...</li>
+                        </ul>
+                        <h4 style="color: var(--accent-neon); margin-top: 15px;">Complejidad</h4>
+                        <div style="background:#333; height:8px; border-radius:4px; overflow:hidden;">
+                            <div id="complexity-bar" style="width:0%; height:100%; background:linear-gradient(90deg, cyan, magenta);"></div>
+                        </div>
+                        <p id="complexity-text" style="text-align:right; font-size:10px; color:#ccc;">Nivel: --</p>
+                    </div>
+                    <div class="graph-panel">
+                        <div id="mermaid-chart" class="mermaid">graph TD; A[Listo] --> B[Analizar];</div>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <div id="view-community" class="view" style="padding:40px;">
+            <h1>Comunidad</h1>
             <div class="stories-grid">
                 <div class="story-card">
-                    <div class="story-image">📖</div>
-                    <div class="story-info">
-                        <h4>Historia Perdida</h4>
-                        <p>Por: AlexDev</p>
-                    </div>
+                    <div class="story-image">📚</div>
+                    <div class="story-info"><h4>Aventura Demo</h4><p>Usuario1</p></div>
                 </div>
-                <div class="story-card">
-                    <div class="story-image">📖</div>
-                    <div class="story-info">
-                        <h4>Noche Eterna</h4>
-                        <p>Por: SarahCode</p>
-                    </div>
                 </div>
-                <div class="story-card">
-                    <div class="story-image">📖</div>
-                    <div class="story-info">
-                        <h4>Viaje Temporal</h4>
-                        <p>Por: JohnDev</p>
-                    </div>
-                </div>
-                <div class="story-card">
-                    <div class="story-image">📖</div>
-                    <div class="story-info">
-                        <h4>Misterio en la Niebla</h4>
-                        <p>Por: Emma</p>
-                    </div>
-                </div>
-                <div class="story-card">
-                    <div class="story-image">📖</div>
-                    <div class="story-info">
-                        <h4>Conexión Digital</h4>
-                        <p>Por: Marcus</p>
-                    </div>
-                </div>
-                <div class="story-card">
-                    <div class="story-image">📖</div>
-                    <div class="story-info">
-                        <h4>El Último Código</h4>
-                        <p>Por: LunaVR</p>
-                    </div>
-                </div>
-                <div class="story-card">
-                    <div class="story-image">📖</div>
-                    <div class="story-info">
-                        <h4>Sueños Recurrentes</h4>
-                        <p>Por: TomDraws</p>
-                    </div>
-                </div>
-                <div class="story-card">
-                    <div class="story-image">📖</div>
-                    <div class="story-info">
-                        <h4>Ciudadano 2077</h4>
-                        <p>Por: CyberAlex</p>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- View 3: Documentation -->
         <div id="view-docs" class="view">
-            <div class="docs-container">
-                <!-- TOC Sidebar -->
-                <aside class="docs-sidebar">
-                    <h3>Documentación</h3>
-                    <nav class="toc">
-                        <a href="#doc-intro" class="toc-link">Introducción</a>
-                        <a href="#doc-sintaxis" class="toc-link">Sintaxis Básica</a>
-                        <a href="#doc-personajes" class="toc-link">Personajes</a>
-                        <a href="#doc-dialogos" class="toc-link">Diálogos</a>
-                        <a href="#doc-audio" class="toc-link">Audio & Música</a>
-                        <a href="#doc-variables" class="toc-link">Variables y Lógica</a>
-                        <a href="#doc-ejemplos" class="toc-link">Ejemplos</a>
-                    </nav>
-                </aside>
-
-                <!-- Main Documentation Content -->
-                <main class="docs-content">
-                    <h1>Documentación de Visual Novel Studio</h1>
-
-                    <section id="doc-intro">
-                        <h2>Introducción</h2>
-                        <p>Visual Novel Studio es un IDE completo para crear novelas visuales interactivas usando nuestro lenguaje <code>.game</code>. Diseñado para ser intuitivo y poderoso.</p>
-                    </section>
-
-                    <section id="doc-sintaxis">
-                        <h2>Sintaxis Básica</h2>
-                        <p>Toda novela visual comienza con la palabra clave <code>game</code>:</p>
-                        <pre><code>game "Mi Primera Novela" {
-    scene inicio {
-        personaje: "Bienvenido a Visual Novel Studio"
-    }
-}</code></pre>
-                    </section>
-
-                    <section id="doc-personajes">
-                        <h2>Personajes</h2>
-                        <p>Define personajes con la palabra clave <code>character</code>:</p>
-                        <pre><code>character alice {
-    nombre: "Alicia",
-    color: "#FF6B6B"
-}</code></pre>
-                    </section>
-
-                    <section id="doc-dialogos">
-                        <h2>Diálogos</h2>
-                        <blockquote>
-                            <p>Los diálogos son el corazón de tu novela visual. Usa comillas para textos y nombres de personajes.</p>
-                        </blockquote>
-                        <pre><code>alice: "¡Hola! ¿Cómo estás?"</code></pre>
-                    </section>
-
-                    <section id="doc-audio">
-                        <h2>Audio & Música</h2>
-                        <p>Añade música y efectos de sonido con URLs directas:</p>
-                        <pre><code>music "https://ejemplo.com/cancion.mp3"
-sound "https://ejemplo.com/efecto.mp3"</code></pre>
-                    </section>
-
-                    <section id="doc-variables">
-                        <h2>Variables y Lógica</h2>
-                        <p>Crea historias ramificadas usando variables y condiciones:</p>
-                        <pre><code>set amistad = 0
-if amistad > 5 {
-    scene final_bueno { ... }
-}</code></pre>
-                    </section>
-
-                    <section id="doc-ejemplos">
-                        <h2>Ejemplos Completos</h2>
-                        <p>Consulta la sección de comunidad para ver historias completas creadas por otros usuarios.</p>
-                    </section>
-                </main>
-            </div>
+            <div class="docs-sidebar"><h3>Indice</h3><a href="#" class="toc-link">Inicio</a></div>
+            <div class="docs-content"><h1>Documentación</h1><p>Bienvenido al manual.</p></div>
         </div>
 
-        <!-- View 4: Profile -->
-        <div id="view-profile" class="view">
-            <div class="profile-container">
-                <div class="profile-header">
-                    <div class="profile-avatar">👤</div>
-                    <h1>Mi Perfil</h1>
-                    <p class="profile-username">@Usuario</p>
-                </div>
-
-                <div class="profile-section">
-                    <h2>Mis Proyectos Publicados</h2>
-                    <div class="projects-list">
-                        <div class="project-item">
-                            <span class="project-icon">📖</span>
-                            <div class="project-details">
-                                <h4>Mi Primera Aventura</h4>
-                                <p>Creado: 12 Nov 2025 • 245 visualizaciones</p>
-                            </div>
-                        </div>
-                        <div class="project-item">
-                            <span class="project-icon">📖</span>
-                            <div class="project-details">
-                                <h4>El Misterio del Código</h4>
-                                <p>Creado: 5 Nov 2025 • 1.2K visualizaciones</p>
-                            </div>
-                        </div>
-                        <div class="project-item">
-                            <span class="project-icon">📖</span>
-                            <div class="project-details">
-                                <h4>Historias sin Fin</h4>
-                                <p>Creado: 28 Oct 2025 • 3.8K visualizaciones</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div id="view-profile" class="view" style="padding:40px;">
+            <h1>Perfil de Usuario</h1>
         </div>
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    
     <script src="compiler.js"></script>
     <script src="syntax-highlighter.js"></script>
     <script src="main.js"></script>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const compileBtn = document.getElementById('load-script-btn');
+            compileBtn.addEventListener('click', () => {
+                // Pequeño delay para asegurar que el engine cargó
+                setTimeout(updateMiniMap, 100);
+            });
+        });
+
+        async function updateMiniMap() {
+            const input = document.getElementById('script-input').value;
+            const container = document.getElementById('mermaid-chart-mini');
+            try {
+                const lexer = new Lexer(input);
+                const parser = new Parser(lexer);
+                const ast = parser.parse();
+                // Usamos el mismo Analyzer que creamos para el robot
+                const analyzer = new StoryAnalyzer(ast);
+                const result = analyzer.generateMermaid();
+                
+                container.removeAttribute('data-processed');
+                container.innerHTML = result.code;
+                await mermaid.run({ nodes: [container] });
+            } catch (e) {
+                console.log("Error actualizando mini-mapa (posible error de sintaxis)");
+            }
+        }
+    </script>
 </body>
 </html>

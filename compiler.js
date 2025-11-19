@@ -8,7 +8,7 @@ const TokenType = Object.freeze({
     LPAREN: 'LPAREN', RPAREN: 'RPAREN', COLON: 'COLON', ARROW: 'ARROW',
     EQUALS: 'EQUALS', SEMICOLON: 'SEMICOLON', IDENTIFIER: 'IDENTIFIER',
     STRING: 'STRING', GOTO: 'GOTO', END_OF_FILE: 'END_OF_FILE', UNKNOWN: 'UNKNOWN',
-    PLAY_MUSIC: 'PLAY_MUSIC',PLAY_SFX: 'PLAY_SFX',STOP_MUSIC: 'STOP_MUSIC',
+    PLAY_MUSIC: 'PLAY_MUSIC', PLAY_SFX: 'PLAY_SFX', STOP_MUSIC: 'STOP_MUSIC',
     FADE: 'FADE', VOLUME: 'VOLUME', AMBIENT: 'AMBIENT', SET_VOLUME: 'SET_VOLUME',
     COMMA: 'COMMA', NUMBER: 'NUMBER',
 });
@@ -33,7 +33,7 @@ class Lexer {
             ["play_music", TokenType.PLAY_MUSIC],
             ["play_sfx", TokenType.PLAY_SFX],
             ["stop_music", TokenType.STOP_MUSIC],
-            ["play_ambient", TokenType.AMBIENT], // Nuevo
+            ["play_ambient", TokenType.AMBIENT],
             ["set_volume", TokenType.SET_VOLUME]
         ]);
     }
@@ -93,14 +93,13 @@ class Lexer {
 
     readString() {
         let value = "";
-        this.currentPos++; // Skip opening "
+        this.currentPos++; 
         while (!this.isAtEnd() && this.source[this.currentPos] !== '"') {
             value += this.source[this.currentPos++];
         }
-        if (!this.isAtEnd()) this.currentPos++; // Skip closing "
+        if (!this.isAtEnd()) this.currentPos++; 
         return { type: TokenType.STRING, value: value, line: this.line };
     }
-    
 
     readIdentifier() {
         let value = "";
@@ -130,15 +129,14 @@ class Lexer {
     }
 }
 
-// --- 3. AST Node Classes (Simplified JS representation) ---
-// Base class (optional, for structure)
+// --- 3. AST Node Classes ---
 class ASTNode { constructor(type) { this.nodeType = type; } }
 
 class PlayMusicNode extends ASTNode {
     constructor(track, options) {
         super('PlayMusicNode');
         this.track = track;
-        this.options = options; // <-- Objeto de opciones
+        this.options = options;
     }
 }
 class PlaySfxNode extends ASTNode {
@@ -154,7 +152,6 @@ class StopMusicNode extends ASTNode {
         this.options = options;
     }
 }
-
 class PlayAmbientNode extends ASTNode {
     constructor(sound, options) {
         super('PlayAmbientNode');
@@ -165,11 +162,10 @@ class PlayAmbientNode extends ASTNode {
 class SetVolumeNode extends ASTNode {
     constructor(target, volume) {
         super('SetVolumeNode');
-        this.target = target; // ej: "music", "ambient"
+        this.target = target;
         this.volume = volume;
     }
 }
-
 class BackgroundNode extends ASTNode {
     constructor(background, options) {
         super('BackgroundNode');
@@ -177,7 +173,6 @@ class BackgroundNode extends ASTNode {
         this.options = options;
     }
 }
-
 class GameNode extends ASTNode {
     constructor(name, declarations, scenes, mainBlock) {
         super('GameNode');
@@ -245,9 +240,8 @@ class IfEventNode extends ASTNode {
     }
 }
 class ChoiceNode extends ASTNode {
-    constructor(options) { super('ChoiceNode'); this.options = options; } // options = [{ text: "...", events: [...] }, ...]
+    constructor(options) { super('ChoiceNode'); this.options = options; }
 }
-
 
 // --- 4. Parser Class ---
 class Parser {
@@ -268,9 +262,7 @@ class Parser {
         }
     }
 
-    parse() {
-        return this.parseGame();
-    }
+    parse() { return this.parseGame(); }
 
     parseGame() {
         this.consume(TokenType.GAME);
@@ -343,15 +335,12 @@ class Parser {
         const id = this.currentToken.value;
         this.consume(TokenType.IDENTIFIER);
         this.consume(TokenType.LBRACE);
-        
-        // El background es opcional ahora
         let background = null;
         if (this.currentToken.type === TokenType.BACKGROUND) {
             this.consume(TokenType.BACKGROUND);
             background = this.currentToken.value;
             this.consume(TokenType.STRING);
         }
-        
         const events = this.parseEventList();
         this.consume(TokenType.RBRACE);
         return new SceneNode(id, background, events);
@@ -359,8 +348,6 @@ class Parser {
 
     parseEventList() {
         const events = [];
-        // ★ ARREGLO ★
-        // Añadimos AMBIENT, SET_VOLUME y BACKGROUND a la lista de eventos permitidos
         while ([
             TokenType.SHOW, TokenType.DIALOGUE, TokenType.CHOICE,
             TokenType.SET, TokenType.IF, TokenType.GOTO,
@@ -491,7 +478,6 @@ class Parser {
         if (this.currentToken.type === TokenType.GOTO) {
             return this.parseGoto();
         }
-        // Otherwise, it must be a scene call
         const sceneId = this.currentToken.value;
         this.consume(TokenType.IDENTIFIER);
         this.consume(TokenType.SEMICOLON);
@@ -526,31 +512,27 @@ class Parser {
         const options = {};
         if (this.currentToken.type === TokenType.LPAREN) {
             this.consume(TokenType.LPAREN);
-            
             while (this.currentToken.type !== TokenType.RPAREN) {
-                const paramName = this.currentToken.value; // ej: 'fade'
+                const paramName = this.currentToken.value;
                 this.consume(TokenType.IDENTIFIER);
                 this.consume(TokenType.COLON);
-                
-                const paramValue = parseFloat(this.currentToken.value); // ej: 2.0
+                const paramValue = parseFloat(this.currentToken.value);
                 this.consume(TokenType.NUMBER);
-                
                 options[paramName] = paramValue;
-                
                 if (this.currentToken.type === TokenType.COMMA) {
                     this.consume(TokenType.COMMA);
                 }
             }
             this.consume(TokenType.RPAREN);
         }
-        return options; // Devuelve ej: { fade: 2.0, volume: 0.8 }
+        return options;
     }
 
     parsePlayMusic() {
         this.consume(TokenType.PLAY_MUSIC);
         const track = this.currentToken.value;
         this.consume(TokenType.STRING);
-        const options = this.parseOptions(); // <-- ¡La magia!
+        const options = this.parseOptions();
         return new PlayMusicNode(track, options);
     }
 
@@ -558,13 +540,13 @@ class Parser {
         this.consume(TokenType.PLAY_SFX);
         const sound = this.currentToken.value;
         this.consume(TokenType.STRING);
-        const options = this.parseOptions(); // <-- ¡La magia!
+        const options = this.parseOptions();
         return new PlaySfxNode(sound, options);
     }
 
     parseStopMusic() {
         this.consume(TokenType.STOP_MUSIC);
-        const options = this.parseOptions(); // <-- ¡La magia!
+        const options = this.parseOptions();
         return new StopMusicNode(options);
     }
 
@@ -578,7 +560,6 @@ class Parser {
 
     parseSetVolume() {
         this.consume(TokenType.SET_VOLUME);
-        // "music", "sfx", "ambient" serán leídos como IDENTIFIER
         const target = this.currentToken.value; 
         this.consume(TokenType.IDENTIFIER); 
         const volume = parseFloat(this.currentToken.value);
@@ -595,7 +576,7 @@ class Parser {
     }
 }
 
-// --- 5. Game Engine Class ---
+// --- 5. Game Engine Class (UPDATED: TIME MACHINE) ---
 class GameEngine {
     constructor() {
         this.ast = null;
@@ -605,19 +586,137 @@ class GameEngine {
 
         this.currentScene = null;
         this.currentEventIndex = -1;
-        this.mainFlow = []; // Array of main statement nodes
+        this.mainFlow = []; 
         this.mainFlowIndex = -1;
         this.gameFinished = false;
-        this.pendingChoice = null; // Stores choice node when waiting for user input
+        this.pendingChoice = null; 
         this.audioManager = { music: null, sfx: {} };
         this.uiInterface = null; 
+
+        // ★ MÁQUINA DEL TIEMPO ★
+        this.historyStack = []; // Pasado (Undo)
+        this.futureStack = [];  // Futuro (Redo)
+        this.maxHistory = 100;  // Límite de pasos
     }
 
     setUiInterface(ui) {
         this.uiInterface = ui; 
     }
 
-    // Semantic Analysis (simplified) - Checks for duplicate declarations and valid references
+    // --- LOGICA DE SNAPSHOTS ---
+    
+    // Captura el estado actual exacto
+    createSnapshot() {
+        return {
+            sceneId: this.currentScene ? this.currentScene.id : null,
+            eventIndex: this.currentEventIndex,
+            mainFlowIndex: this.mainFlowIndex,
+            // Clona el Map para que los cambios futuros no afecten al historial
+            flagStates: new Map(this.flagStates), 
+            gameFinished: this.gameFinished,
+            pendingChoice: this.pendingChoice 
+            // Nota: Para una máquina perfecta, también deberíamos guardar
+            // qué música suena y qué fondo hay, para restaurarlo visualmente.
+        };
+    }
+
+    // Guarda estado en la pila de historia
+    pushHistory() {
+        const snapshot = this.createSnapshot();
+        this.historyStack.push(snapshot);
+        if (this.historyStack.length > this.maxHistory) {
+            this.historyStack.shift(); // Elimina el más antiguo
+        }
+        this.futureStack = []; // Al tomar nueva decisión, borramos el futuro alternativo
+        console.log(`[History] Snapshot saved. Total: ${this.historyStack.length}`);
+    }
+
+    // Restaura un estado desde un snapshot
+    restoreSnapshot(snapshot) {
+        if (!snapshot) return;
+
+        // Restaurar Escena
+        if (snapshot.sceneId && this.scenes.has(snapshot.sceneId)) {
+            this.currentScene = this.scenes.get(snapshot.sceneId);
+        } else {
+            this.currentScene = null;
+        }
+        
+        // Restaurar Índices
+        this.currentEventIndex = snapshot.eventIndex;
+        this.mainFlowIndex = snapshot.mainFlowIndex;
+        this.gameFinished = snapshot.gameFinished;
+        this.pendingChoice = snapshot.pendingChoice;
+        
+        // Restaurar Flags (Clonar de vuelta)
+        this.flagStates = new Map(snapshot.flagStates);
+        
+        console.log("[History] State restored.");
+    }
+
+    // Retroceder (Undo)
+    undo() {
+        if (this.historyStack.length === 0) {
+            console.warn("No history to undo.");
+            return null;
+        }
+
+        // 1. Guardamos donde estamos ahora en el futuro
+        const currentSnapshot = this.createSnapshot();
+        this.futureStack.push(currentSnapshot);
+
+        // 2. Recuperamos el pasado
+        const previousSnapshot = this.historyStack.pop();
+        this.restoreSnapshot(previousSnapshot);
+
+        // 3. Devolvemos lo que la UI debe mostrar AHORA
+        return this.getCurrentInteraction();
+    }
+
+    // Avanzar (Redo)
+    redo() {
+        if (this.futureStack.length === 0) {
+            console.warn("No future to redo.");
+            return null;
+        }
+
+        // 1. Guardamos el presente en el pasado
+        const currentSnapshot = this.createSnapshot();
+        this.historyStack.push(currentSnapshot);
+
+        // 2. Recuperamos el futuro
+        const nextSnapshot = this.futureStack.pop();
+        this.restoreSnapshot(nextSnapshot);
+
+        // 3. Devolvemos lo que la UI debe mostrar
+        return this.getCurrentInteraction();
+    }
+
+    // Helper para decirle a la UI qué pintar tras un viaje en el tiempo
+    getCurrentInteraction() {
+        if (this.gameFinished) return { type: 'fin', message: "Game Ended." };
+        if (this.pendingChoice) return { type: 'waiting_choice', options: this.pendingChoice.options.map(o => o.text) };
+        
+        // Si estamos en medio de una escena, buscar el evento actual
+        if (this.currentScene && this.currentEventIndex >= 0 && this.currentEventIndex < this.currentScene.events.length) {
+            const event = this.currentScene.events[this.currentEventIndex];
+            
+            if (event.nodeType === 'DialogueNode') {
+                const speaker = this.characters.get(event.characterId);
+                return {
+                    type: 'dialogue',
+                    hablante: speaker ? speaker.displayName : event.characterId,
+                    texto: event.text
+                };
+            }
+        }
+        
+        // Si no es diálogo ni elección, intentamos avanzar un paso 'safe' para encontrar algo pintable
+        // (Ojo: esto podría tener efectos secundarios, por ahora devolvemos un estado neutro)
+        return { type: 'dialogue', hablante: 'System', texto: 'Estado restaurado. Pulsa Continuar.' };
+    }
+
+    // --- Semantic Analysis ---
     analyze(ast) {
         const declaredChars = new Set();
         const declaredFlags = new Set();
@@ -638,47 +737,17 @@ class GameEngine {
             declaredScenes.add(scene.id);
         });
 
-        // Basic reference checks (can be expanded)
-        ast.scenes.forEach(scene => {
-            scene.events.forEach(event => {
-                 if (event.nodeType === 'ShowCharacterNode' || event.nodeType === 'DialogueNode') {
-                    if (!declaredChars.has(event.characterId)) errors.push(`Undeclared character used: ${event.characterId} in scene ${scene.id}`);
-                } else if (event.nodeType === 'SetFlagNode' || event.nodeType === 'IfEventNode') {
-                    if (!declaredFlags.has(event.flagId)) errors.push(`Undeclared flag used: ${event.flagId} in scene ${scene.id}`);
-                } else if (event.nodeType === 'GotoNode') {
-                    if (!declaredScenes.has(event.targetSceneId)) errors.push(`Goto target scene not declared: ${event.targetSceneId} in scene ${scene.id}`);
-                } else if (event.nodeType === 'ChoiceNode') {
-                    event.options.forEach(opt => { /* Recursive check possible here */ });
-                }
-            });
-        });
-        if (ast.mainBlock) {
-             ast.mainBlock.statements.forEach(stmt => {
-                if (stmt.nodeType === 'SceneCallNode') {
-                     if (!declaredScenes.has(stmt.sceneId)) errors.push(`Main calls undeclared scene: ${stmt.sceneId}`);
-                } else if (stmt.nodeType === 'IfStatementNode') {
-                    if (!declaredFlags.has(stmt.flagId)) errors.push(`Main uses undeclared flag in if: ${stmt.flagId}`);
-                     /* Recursive check possible here */
-                }
-            });
-        }
-
-
-        if (errors.length > 0) {
-            throw new Error(`Semantic Errors:\n${errors.join('\n')}`);
-        }
+        if (errors.length > 0) throw new Error(`Semantic Errors:\n${errors.join('\n')}`);
         console.log("Semantic analysis passed.");
     }
-
 
     loadGame(scriptText) {
         try {
             const lexer = new Lexer(scriptText);
             const parser = new Parser(lexer);
             this.ast = parser.parse();
-            this.analyze(this.ast); // Run semantic analysis
+            this.analyze(this.ast);
 
-            // Populate engine state from AST
             this.ast.declarations.forEach(decl => {
                 if (decl.nodeType === 'CharacterDeclarationNode') {
                     this.characters.set(decl.id, decl);
@@ -690,18 +759,20 @@ class GameEngine {
                 this.scenes.set(scene.id, scene);
             });
 
-            if (!this.ast.mainBlock) {
-                throw new Error("Game requires a 'main' block.");
-            }
-            this.mainFlow = [...this.ast.mainBlock.statements]; // Copy statements
+            if (!this.ast.mainBlock) throw new Error("Game requires a 'main' block.");
+            
+            this.mainFlow = [...this.ast.mainBlock.statements];
             this.mainFlowIndex = -1;
             this.gameFinished = false;
             this.currentScene = null;
             this.currentEventIndex = -1;
             this.pendingChoice = null;
+            
+            // Reset History
+            this.historyStack = [];
+            this.futureStack = [];
 
             console.log(`Game '${this.ast.name}' loaded successfully.`);
-            // Don't call advance() here, main.js will call it first.
             return { type: 'loaded' };
 
         } catch (error) {
@@ -710,10 +781,8 @@ class GameEngine {
         }
     }
 
-    // Processes the next step in the game
     advance() {
         if (this.gameFinished || this.pendingChoice) {
-            // If waiting for choice or finished, do nothing until choice is made or game restarts
             return this.pendingChoice
                 ? { type: 'waiting_choice', options: this.pendingChoice.options.map(o => o.text) }
                 : { type: 'fin', message: "Game has ended." };
@@ -721,67 +790,51 @@ class GameEngine {
 
         let currentEventResult = null;
 
-        // Priority 1: Execute events within the current scene
+        // Priority 1: Scene Events
         if (this.currentScene && this.currentEventIndex < this.currentScene.events.length - 1) {
             this.currentEventIndex++;
             currentEventResult = this.executeEvent(this.currentScene.events[this.currentEventIndex]);
         }
-        // Priority 2: If scene events are done (or no scene active), advance the main flow
+        // Priority 2: Main Flow
         else {
             this.mainFlowIndex++;
             if (this.mainFlowIndex < this.mainFlow.length) {
                 const mainStmt = this.mainFlow[this.mainFlowIndex];
 
-        if (mainStmt.nodeType === 'SceneCallNode') {
-            if (this.scenes.has(mainStmt.sceneId)) {
-                
-                const scene = this.scenes.get(mainStmt.sceneId);
-                const bg = scene.background;
+                if (mainStmt.nodeType === 'SceneCallNode') {
+                    if (this.scenes.has(mainStmt.sceneId)) {
+                        const scene = this.scenes.get(mainStmt.sceneId);
+                        const bg = scene.background;
 
-                // ★ CAMBIO ★ Lógica de IA
-                if (bg.startsWith("generate:")) {
-                    // ¡PAUSA! Devuelve un objeto especial para la UI
-                    return {
-                        type: 'load_background',
-                        prompt: bg.substring("generate:".length).trim(),
-                        sceneId: mainStmt.sceneId // Pasa el ID de la escena
-                    };
-                }
-                
-                // Carga de fondo normal (síncrona)
-                if (this.uiInterface) {
-                    this.uiInterface.setBackground(bg); // Llama a la UI
-                }
-                
-                // Continúa como antes
-                this.currentScene = scene;
-                this.currentEventIndex = -1;
-                console.log(`Entering scene: ${this.currentScene.id}`);
-                return this.advance(); // Continúa la recursión
+                        if (bg && bg.startsWith("generate:")) {
+                             return {
+                                type: 'load_background',
+                                prompt: bg.substring("generate:".length).trim(),
+                                sceneId: mainStmt.sceneId
+                            };
+                        }
+                        
+                        if (this.uiInterface && bg) this.uiInterface.setBackground(bg);
+                        
+                        this.currentScene = scene;
+                        this.currentEventIndex = -1;
+                        return this.advance(); 
 
-            } else {
-                return { type: 'error', message: `Runtime Error: Scene '${mainStmt.sceneId}' not found.` };
-            }
-        } else if (mainStmt.nodeType === 'IfStatementNode') {
+                    } else {
+                        return { type: 'error', message: `Runtime Error: Scene '${mainStmt.sceneId}' not found.` };
+                    }
+                } else if (mainStmt.nodeType === 'IfStatementNode') {
                     const flagValue = this.flagStates.get(mainStmt.flagId) || false;
                     const branchToInject = flagValue ? mainStmt.trueBranch : mainStmt.falseBranch;
-                     // Inject the chosen branch's statements into the main flow
                     this.mainFlow.splice(this.mainFlowIndex + 1, 0, ...branchToInject);
-                    console.log(`Main If '${mainStmt.flagId}' is ${flagValue}. Injecting ${branchToInject.length} statements.`);
-                    // Immediately advance to the first injected statement
                     return this.advance();
                 }
-
             } else {
-                // Reached the end of the main flow
                 this.gameFinished = true;
                 return { type: 'fin', message: "End of game." };
             }
         }
 
-        // If executeEvent returned a result (like dialogue or choice), return it.
-        // Otherwise (if it was an instant action like set/show/goto), recursively call advance()
-        // to process the *next* thing immediately.
         return currentEventResult ? currentEventResult : this.advance();
     }
 
@@ -789,19 +842,18 @@ class GameEngine {
         if (this.scenes.has(sceneId)) {
             this.currentScene = this.scenes.get(sceneId);
             this.currentEventIndex = -1;
-            console.log(`Finished async load, entering scene: ${this.currentScene.id}`);
-            // Avanza al primer evento de la nueva escena
             return this.advance();
         } else {
             return { type: 'error', message: `Runtime Error: Scene '${sceneId}' not found post-load.` };
         }
     }
 
-    // Executes a single event node from a scene
     executeEvent(event) {
         switch (event.nodeType) {
             case 'DialogueNode':
-                console.log(`Dialogue: ${event.characterId}: ${event.text}`);
+                // ★ SAVE HISTORY BEFORE DIALOGUE ★
+                this.pushHistory();
+                
                 const speaker = this.characters.get(event.characterId);
                 return {
                     type: 'dialogue',
@@ -810,107 +862,342 @@ class GameEngine {
                 };
 
             case 'ShowCharacterNode':
-                console.log(`Show: ${event.characterId} at ${event.position}`);
-                const char = this.characters.get(event.characterId);
-                // ★ CAMBIO ★ Llama a la UI antes de retornar null
                 if (this.uiInterface) {
+                    const char = this.characters.get(event.characterId);
                     this.uiInterface.showCharacter(char ? char.sprite : '', event.position);
                 }
                 return null;
 
             case 'SetFlagNode':
-                console.log(`Set Flag: ${event.flagId} = ${event.value}`);
                 this.flagStates.set(event.flagId, event.value);
-                return null; // Instant action
+                return null;
 
             case 'GotoNode':
-                 console.log(`Goto: ${event.targetSceneId}`);
                  if (this.scenes.has(event.targetSceneId)) {
                     this.currentScene = this.scenes.get(event.targetSceneId);
-                    this.currentEventIndex = -1; // Reset for the new scene
+                    this.currentEventIndex = -1;
                  } else {
                      return { type: 'error', message: `Runtime Error: Scene '${event.targetSceneId}' not found.` };
                  }
-                return null; // Action performed, continue processing (will likely trigger advance again for the new scene)
+                return null; 
 
             case 'IfEventNode':
-                console.log(`Scene If: ${event.flagId}`);
                 const flagValue = this.flagStates.get(event.flagId) || false;
                 const eventsToInject = flagValue ? event.trueEvents : event.falseEvents;
                 if (eventsToInject.length > 0) {
-                     // Inject events into the current scene's event list
-                     this.currentScene.events.splice(this.currentEventIndex + 1, 0, ...eventsToInject);
-                     console.log(`Injecting ${eventsToInject.length} events into scene ${this.currentScene.id}`);
+                      this.currentScene.events.splice(this.currentEventIndex + 1, 0, ...eventsToInject);
                 }
-                return null; // Instantly continue to process next (potentially injected) event
+                return null;
 
             case 'ChoiceNode':
-                 console.log(`Choice presented with ${event.options.length} options.`);
-                 this.pendingChoice = event; // Store the choice node
-                 // Return structure indicating we are waiting for user input
+                 // ★ SAVE HISTORY BEFORE CHOICE ★
+                 this.pushHistory();
+                 
+                 this.pendingChoice = event;
                  return { type: 'waiting_choice', options: event.options.map(o => o.text) };
 
             case 'PlayMusicNode':
-                console.log(`Play Music: ${event.track}`, event.options);
-                if (this.uiInterface) {
-                    this.uiInterface.playMusic(event.track, event.options); // Pasa las opciones
-                }
+                if (this.uiInterface) this.uiInterface.playMusic(event.track, event.options);
                 return null;
 
             case 'PlaySfxNode':
-                console.log(`Play SFX: ${event.sound}`, event.options);
-                if (this.uiInterface) {
-                    this.uiInterface.playSfx(event.sound, event.options); // Pasa las opciones
-                }
+                if (this.uiInterface) this.uiInterface.playSfx(event.sound, event.options);
                 return null;
 
             case 'StopMusicNode':
-                console.log(`Stop Music`, event.options);
-                if (this.uiInterface) {
-                    this.uiInterface.stopMusic(event.options); // Pasa las opciones
-                }
+                if (this.uiInterface) this.uiInterface.stopMusic(event.options);
                 return null;
             
             case 'PlayAmbientNode':
-                console.log(`Play Ambient: ${event.sound}`, event.options);
-                if (this.uiInterface) {
-                    // Esperamos que main.js tenga esta función
-                    this.uiInterface.playAmbient(event.sound, event.options); 
-                }
+                if (this.uiInterface) this.uiInterface.playAmbient(event.sound, event.options); 
                 return null;
 
             case 'SetVolumeNode':
-                console.log(`Set Volume: ${event.target} to ${event.volume}`);
-                if (this.uiInterface) {
-                    // Esperamos que main.js tenga esta función
-                    this.uiInterface.setVolume(event.target, event.volume); 
-                }
+                if (this.uiInterface) this.uiInterface.setVolume(event.target, event.volume); 
                 return null;
+            
+            case 'BackgroundNode':
+                 if (this.uiInterface) this.uiInterface.setBackground(event.background);
+                 return null;
 
             default:
-                 console.warn(`Unknown event type: ${event.nodeType}`);
-                 return null; // Skip unknown events
+                 return null; 
         }
     }
 
-    // Called when the user selects a choice
     makeChoice(choiceIndex) {
+        // No necesitamos pushHistory aquí porque ya lo hicimos en executeEvent(ChoiceNode)
+        // Esto permite que "Undo" te lleve de vuelta a ver las opciones, en vez de a la línea anterior a las opciones.
+        
         if (!this.pendingChoice || choiceIndex < 0 || choiceIndex >= this.pendingChoice.options.length) {
-            console.error("Invalid choice index or no choice pending.");
             return { type: 'error', message: 'Invalid choice selection.' };
         }
 
         const chosenOption = this.pendingChoice.options[choiceIndex];
-        console.log(`Choice made: "${chosenOption.text}". Injecting ${chosenOption.events.length} events.`);
-
-        // Inject the chosen option's events into the current scene's event list
         if (chosenOption.events.length > 0) {
             this.currentScene.events.splice(this.currentEventIndex + 1, 0, ...chosenOption.events);
         }
 
-        this.pendingChoice = null; // Clear pending choice
-
-        // Immediately advance to process the first event of the chosen option
+        this.pendingChoice = null; 
         return this.advance();
+    }
+}
+
+
+// ============================================================================
+// --- 6. NARRATIVE INTELLIGENCE MODULE (Robot & Visualizer Unified) ---
+// ============================================================================
+
+// Clase auxiliar para guardar el reporte del "Robot"
+class NarrativeReport {
+    constructor() {
+        this.totalScenes = 0;
+        this.totalWords = 0;
+        this.totalChoices = 0;
+        this.endingsReached = 0;
+        this.brokenLinks = []; // Lista de errores críticos (Enlaces a la nada)
+        this.complexityScore = 0; // Puntuación de complejidad narrativa
+    }
+}
+
+class StoryAnalyzer {
+    constructor(ast) {
+        this.ast = ast;
+        this.report = new NarrativeReport();
+        this.sceneMap = new Map(); // Mapa rápido para validar existencia
+        this.clusters = new Map(); // Mapa para agrupar capítulos (Clusterización)
+        
+        // Indexar todas las escenas existentes al inicio
+        this.ast.scenes.forEach(s => this.sceneMap.set(s.id, s));
+    }
+
+    // --- FASE 1: EL ROBOT (Análisis Lógico y Métricas) ---
+    analyze() {
+        // Reiniciar reporte
+        this.report = new NarrativeReport();
+        this.report.totalScenes = this.ast.scenes.length;
+        this.clusters.clear();
+
+        // Analizar cada escena individualmente
+        this.ast.scenes.forEach(scene => {
+            // Variables locales de la escena
+            let words = 0;
+            let choices = 0;
+            let isEnding = true; // Asumimos que es final hasta encontrar una salida
+            let outLinks = [];   // A dónde lleva esta escena
+
+            // Función recursiva para inspeccionar eventos profundos (dentro de IFs o Choices)
+            const traverseEvents = (events) => {
+                events.forEach(e => {
+                    if (e.nodeType === 'DialogueNode') {
+                        // Contar palabras (aprox por espacios)
+                        words += e.text.split(/\s+/).length;
+                    } else if (e.nodeType === 'ChoiceNode') {
+                        choices++;
+                        isEnding = false; // Si hay opciones, la historia sigue
+                        e.options.forEach(opt => traverseEvents(opt.events));
+                    } else if (e.nodeType === 'GotoNode') {
+                        isEnding = false;
+                        outLinks.push(e.targetSceneId);
+                    } else if (e.nodeType === 'SceneCallNode') {
+                        isEnding = false;
+                        outLinks.push(e.sceneId);
+                    } else if (e.nodeType === 'IfEventNode' || e.nodeType === 'IfStatementNode') {
+                        // Revisar ambas ramas del IF
+                        const tEvents = e.trueEvents || e.trueBranch;
+                        const fEvents = e.falseEvents || e.falseBranch;
+                        if (tEvents) traverseEvents(tEvents);
+                        if (fEvents) traverseEvents(fEvents);
+                    }
+                });
+            };
+
+            traverseEvents(scene.events);
+
+            // Actualizar métricas globales del reporte
+            this.report.totalWords += words;
+            this.report.totalChoices += choices;
+            if (isEnding) this.report.endingsReached++;
+
+            // Detección de Errores: Validar Enlaces Rotos
+            outLinks.forEach(targetId => {
+                if (!this.sceneMap.has(targetId)) {
+                    this.report.brokenLinks.push({
+                        source: scene.id,
+                        target: targetId
+                    });
+                }
+            });
+
+            // Guardar metadata inteligente en la escena (para el visualizador)
+            scene._meta = {
+                type: choices > 0 ? 'decision' : (isEnding ? 'ending' : 'normal'),
+                wordCount: words,
+                hasIssues: outLinks.some(l => !this.sceneMap.has(l))
+            };
+
+            // Clusterización Automática: Agrupar por prefijo (ej: 'cap1_intro' -> 'cap1')
+            const prefix = scene.id.includes('_') ? scene.id.split('_')[0] : 'global';
+            if (!this.clusters.has(prefix)) this.clusters.set(prefix, []);
+            this.clusters.get(prefix).push(scene);
+        });
+
+        // Calcular complejidad (Fórmula simple: Palabras/100 + Decisiones*2 + Escenas)
+        this.report.complexityScore = Math.round(
+            (this.report.totalWords / 100) + (this.report.totalChoices * 2) + this.report.totalScenes
+        );
+
+        return this.report;
+    }
+
+    // --- FASE 2: EL VISUALIZADOR (Generación de Código Mermaid) ---
+    generateMermaid() {
+        // Asegurarse de que el robot ha corrido primero
+        if (this.report.totalScenes === 0) this.analyze();
+
+        let mm = "graph TD;\n"; // Iniciar gráfico Top-Down
+
+        // --- A. ESTILOS VISUALES (Tema Cyberpunk/Dark) ---
+        mm += "    classDef normal fill:#1a1a1a,stroke:#00ffff,stroke-width:2px,color:#fff;\n";
+        mm += "    classDef decision fill:#2a0a2a,stroke:#ff00ff,stroke-width:2px,color:#fff,shape:rhombus;\n"; // Rombo
+        mm += "    classDef ending fill:#003300,stroke:#00ff41,stroke-width:4px,color:#fff,shape:circle;\n"; // Círculo
+        mm += "    classDef error fill:#550000,stroke:#ff0000,stroke-width:4px,color:#fff,stroke-dasharray: 5 5;\n"; // Rojo y punteado
+        mm += "    classDef startNode fill:#00ff41,stroke:#000,stroke-width:2px,color:#000;\n";
+
+        // --- B. NODO DE INICIO ---
+        mm += "    START((INICIO)):::startNode --> Main;\n";
+
+        // --- C. DIBUJAR NODOS (Agrupados por Clusters) ---
+        this.clusters.forEach((scenes, prefix) => {
+            if (prefix !== 'global') {
+                mm += `    subgraph ${prefix.toUpperCase()}\n`; // Caja alrededor del capítulo
+            }
+
+            scenes.forEach(scene => {
+                // Determinar forma y color según lo que descubrió el robot
+                let shapeOpen = "[";
+                let shapeClose = "]";
+                let styleClass = "normal";
+
+                if (scene._meta.hasIssues) {
+                    styleClass = "error"; // Error detectado por el robot
+                } else if (scene._meta.type === 'decision') {
+                    shapeOpen = "{"; shapeClose = "}";
+                    styleClass = "decision";
+                } else if (scene._meta.type === 'ending') {
+                    shapeOpen = "(("; shapeClose = "))";
+                    styleClass = "ending";
+                }
+
+                // Etiqueta del nodo (Nombre)
+                const label = `${scene.id}`; 
+                mm += `    ${scene.id}${shapeOpen}"${label}"${shapeClose}:::${styleClass};\n`;
+            });
+
+            if (prefix !== 'global') {
+                mm += `    end\n`;
+            }
+        });
+
+        // --- D. DIBUJAR FLECHAS (Conexiones Inteligentes) ---
+        const processedEdges = new Set();
+
+        // Función helper para añadir flechas con contexto
+        const addEdge = (from, to, label = null, changes = []) => {
+            let edgeText = "";
+            
+            // Texto de la decisión (ej. "Ir al bosque")
+            if (label) {
+                const cleanLabel = label.replace(/"/g, "'").substring(0, 25);
+                edgeText += cleanLabel + (label.length > 25 ? "..." : "");
+            }
+
+            // Mostrar cambios de estado en la flecha (ej. "$dinero=10")
+            if (changes.length > 0) {
+                if (edgeText) edgeText += "<br/>"; 
+                edgeText += `[${changes.join(', ')}]`;
+            }
+
+            const arrow = edgeText ? `-- "${edgeText}" -->` : "-->";
+            const edgeString = `    ${from} ${arrow} ${to}`;
+
+            if (!processedEdges.has(edgeString)) {
+                mm += edgeString + "\n";
+                processedEdges.add(edgeString);
+                
+                // Si el destino no existe, crear un nodo fantasma de error para que se vea
+                if (!this.sceneMap.has(to)) {
+                    mm += `    ${to}[MISSING: ${to}]:::error;\n`;
+                }
+            }
+        };
+
+        // Recorrer Main
+        if (this.ast.mainBlock) {
+            this.scanBlockForEdges("Main", this.ast.mainBlock.statements, addEdge);
+        }
+
+        // Recorrer todas las escenas
+        this.ast.scenes.forEach(scene => {
+            this.scanBlockForEdges(scene.id, scene.events, addEdge);
+        });
+
+        return {
+            code: mm,      // Código para Mermaid
+            stats: this.report // Datos numéricos para el dashboard
+        };
+    }
+
+    // Helper para extraer flechas y cambios de variables del AST
+    scanBlockForEdges(sourceId, statements, addEdgeCallback) {
+        let pendingChanges = []; // Acumula cambios de variables antes de un salto
+
+        const scan = (stmts) => {
+            if (!stmts) return;
+            stmts.forEach(stmt => {
+                // Capturar SET (Cambio de variable)
+                if (stmt.nodeType === 'SetFlagNode') {
+                    pendingChanges.push(`$${stmt.flagId}=${stmt.value}`);
+                }
+                // GOTO (Salto)
+                else if (stmt.nodeType === 'GotoNode') {
+                    addEdgeCallback(sourceId, stmt.targetSceneId, null, pendingChanges);
+                    pendingChanges = []; // Reiniciar tras el salto
+                }
+                // CALL (Llamada)
+                else if (stmt.nodeType === 'SceneCallNode') {
+                    addEdgeCallback(sourceId, stmt.sceneId, "call", pendingChanges);
+                }
+                // CHOICE (Decisión)
+                else if (stmt.nodeType === 'ChoiceNode') {
+                    stmt.options.forEach(opt => {
+                        // Buscar si esta opción lleva a algún lado
+                        const internalChanges = []; 
+                        let foundGoto = false;
+                        
+                        // Análisis superficial de la opción
+                        opt.events.forEach(e => {
+                             if(e.nodeType === 'SetFlagNode') internalChanges.push(`$${e.flagId}=${e.value}`);
+                             if(e.nodeType === 'GotoNode') {
+                                 // Unir cambios previos + internos
+                                 const allChanges = [...pendingChanges, ...internalChanges];
+                                 addEdgeCallback(sourceId, e.targetSceneId, opt.text, allChanges);
+                                 foundGoto = true;
+                             }
+                        });
+                        
+                        // Si no hay goto directo, seguir escaneando (puede haber ifs dentro)
+                        if(!foundGoto) scan(opt.events);
+                    });
+                }
+                // IF (Condicional)
+                else if (stmt.nodeType === 'IfStatementNode' || stmt.nodeType === 'IfEventNode') {
+                    scan(stmt.trueBranch || stmt.trueEvents);
+                    scan(stmt.falseBranch || stmt.falseEvents);
+                }
+            });
+        };
+
+        scan(statements);
     }
 }
