@@ -58,11 +58,7 @@ function setupToolsPanel() {
             const text = (fi.textContent || '').trim().toLowerCase();
             if (text.includes('assets')) switchToolTab('tab-assets');
             else if (text.includes('audio')) switchToolTab('tab-audio');
-            else if (text.includes('script')) {
-                // focus editor area if script selected
-                const el = document.getElementById('script-input');
-                if (el) el.focus();
-            }
+            else if (text.includes('script')) switchToolTab('tab-scripts');
             // keep other file-item behaviors (hover) intact
         });
     });
@@ -101,24 +97,52 @@ function switchView(viewName) {
 // --- EDITOR CON NÚMEROS DE LÍNEA ---
 function initializeCodeEditor() {
     const scriptInput = document.getElementById('script-input');
+    const highlight = document.getElementById('syntax-highlight');
     const lineNumbers = document.getElementById('line-numbers');
     
     if (!scriptInput || !lineNumbers) return;
-    
-    function updateLineNumbers() {
-        const lines = scriptInput.value.split('\n').length;
+
+    // 1. Función para actualizar visualización y líneas
+    function updateEditor() {
+        const text = scriptInput.value;
+        
+        // A) Actualizar Números de Línea
+        const lines = text.split('\n').length;
         let lineNumbersHTML = '';
         for (let i = 1; i <= lines; i++) {
             lineNumbersHTML += i + '\n';
         }
         lineNumbers.innerText = lineNumbersHTML;
+
+        // B) Actualizar Highlighter (Escape básico HTML para evitar inyecciones)
+        let safeText = text.replace(/&/g, "&amp;")
+                           .replace(/</g, "&lt;")
+                           .replace(/>/g, "&gt;");
+        
+        if(highlight) {
+            highlight.innerText = safeText;
+        }
     }
     
-    scriptInput.addEventListener('input', updateLineNumbers);
-    scriptInput.addEventListener('scroll', () => {
-        lineNumbers.scrollTop = scriptInput.scrollTop;
-    });
-    updateLineNumbers();
+    // 2. Función de Sincronización de Scroll
+    function syncScroll() {
+        const scrollTop = scriptInput.scrollTop;
+        const scrollLeft = scriptInput.scrollLeft;
+        
+        // Sincronizamos números y el highlighter con el textarea
+        lineNumbers.scrollTop = scrollTop;
+        if(highlight) {
+            highlight.scrollTop = scrollTop;
+            highlight.scrollLeft = scrollLeft;
+        }
+    }
+    
+    // 3. Event Listeners
+    scriptInput.addEventListener('input', updateEditor);
+    scriptInput.addEventListener('scroll', syncScroll);
+    
+    // Inicializar al cargar
+    updateEditor();
 }
 
 // --- GESTOR DE AUDIO ---
@@ -276,9 +300,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch (result.type) {
             case 'dialogue':
-                clearDialogue(); 
+                clearDialogue();
+                // Mostrar nombre del personaje con estilos (ya definidos en CSS)
                 speakerNameEl.textContent = result.hablante;
+                speakerNameEl.style.display = 'block';
+                // Mostrar texto del diálogo con estilos
                 dialogueTextEl.textContent = result.texto;
+                dialogueTextEl.style.display = 'block';
                 break;
             case 'waiting_choice':
                 clearDialogue(); 
@@ -493,19 +521,86 @@ document.addEventListener('DOMContentLoaded', () => {
         else addAssetObject(url.split('/').pop(), url, 'image');
     }
 
+    // --- GESTOR DE ASSETS MEJORADO CON LISTA VISUAL ---
+    // Crear contenedor de lista de URLs recientes (para el gestor de assets)
+    const assetUrlListContainer = document.createElement('div');
+    assetUrlListContainer.className = 'asset-list';
+    assetUrlListContainer.id = 'asset-url-list';
+    assetUrlListContainer.style.marginTop = '12px';
+    
+    // Insertar después del #asset-output-container en el DOM
+    const insertAfter = assetOutputContainer;
+    if (insertAfter && insertAfter.parentNode) {
+        insertAfter.parentNode.insertBefore(assetUrlListContainer, insertAfter.nextSibling);
+    }
+
+    // URLs agregadas recientemente (para visualización rápida)
+    let recentAssetUrls = [];
+    const MAX_RECENT_URLS = 5;
+
+    function addToRecentUrls(url, name) {
+        // Remover duplicados
+        recentAssetUrls = recentAssetUrls.filter(item => item.url !== url);
+        // Agregar al inicio
+        recentAssetUrls.unshift({ url, name: name || url.split('/').pop() || 'Asset' });
+        // Limitar cantidad
+        if (recentAssetUrls.length > MAX_RECENT_URLS) {
+            recentAssetUrls = recentAssetUrls.slice(0, MAX_RECENT_URLS);
+        }
+        renderRecentAssetUrls();
+    }
+
+    function renderRecentAssetUrls() {
+        const container = document.getElementById('asset-url-list');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        recentAssetUrls.forEach((item, idx) => {
+            const listItem = document.createElement('div');
+            listItem.className = 'asset-list-item';
+            
+            const urlDisplay = document.createElement('div');
+            urlDisplay.className = 'asset-url-truncated';
+            urlDisplay.title = item.url; // tooltip con URL completa
+            urlDisplay.textContent = item.name;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'asset-delete-btn';
+            deleteBtn.textContent = '✕';
+            deleteBtn.title = 'Eliminar';
+            deleteBtn.addEventListener('click', () => {
+                recentAssetUrls.splice(idx, 1);
+                renderRecentAssetUrls();
+            });
+            
+            listItem.appendChild(urlDisplay);
+            listItem.appendChild(deleteBtn);
+            container.appendChild(listItem);
+        });
+    }
+
     if (assetUrlBtn) {
         assetUrlBtn.addEventListener('click', () => {
             const url = assetUrlInput.value.trim();
-            if (url) { showAndCopyAsset(url); assetUrlInput.value = ''; renderAssetsLibrary(); renderAudioLibrary(); }
+            if (url) {
+                showAndCopyAsset(url);
+                addToRecentUrls(url, url.split('/').pop() || 'URL Asset');
+                assetUrlInput.value = '';
+                renderAssetsLibrary();
+                renderAudioLibrary();
+            }
         });
     }
+
     if (assetFileInput) {
         assetFileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
                 const blobUrl = URL.createObjectURL(file);
+                addToRecentUrls(blobUrl, file.name);
                 // classify by mime
                 if (file.type && file.type.startsWith('audio/')) addAssetObject(file.name, blobUrl, 'audio');
+
                 else addAssetObject(file.name, blobUrl, 'image');
                 // also expose to user
                 assetOutputContainer.style.display = 'block'; assetOutputText.textContent = `"${blobUrl}"`;
