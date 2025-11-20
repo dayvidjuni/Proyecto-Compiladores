@@ -19,7 +19,75 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     initializeCodeEditor();
+    // Initialize Tools Panel: wire existing file-tree items as tab buttons
+    try {
+        setupToolsPanel();
+    } catch (e) {
+        console.warn('Tools panel init skipped', e);
+    }
 });
+
+// Switch the tools tab: shows the selected view and marks active button
+function switchToolTab(tabId) {
+    // Mark the appropriate file-item as active (the previous buttons)
+    const fileItems = document.querySelectorAll('.file-item');
+    fileItems.forEach(fi => {
+        const text = (fi.textContent || '').trim().toLowerCase();
+        const target = text.includes('assets') ? 'tab-assets' : (text.includes('audio') ? 'tab-audio' : null);
+        fi.classList.toggle('active', target === tabId);
+    });
+
+    // Show/hide tool views
+    const views = document.querySelectorAll('.tool-view');
+    views.forEach(v => {
+        if (v.id === tabId) {
+            v.style.display = 'block';
+            requestAnimationFrame(() => { v.style.opacity = '1'; });
+        } else {
+            v.style.opacity = '0';
+            v.style.display = 'none';
+        }
+    });
+}
+
+function setupToolsPanel() {
+    // Use existing file-tree items as triggers for the tools views
+    const fileItems = document.querySelectorAll('.file-item');
+    fileItems.forEach(fi => {
+        fi.addEventListener('click', () => {
+            const text = (fi.textContent || '').trim().toLowerCase();
+            if (text.includes('assets')) switchToolTab('tab-assets');
+            else if (text.includes('audio')) switchToolTab('tab-audio');
+            else if (text.includes('script')) {
+                // focus editor area if script selected
+                const el = document.getElementById('script-input');
+                if (el) el.focus();
+            }
+            // keep other file-item behaviors (hover) intact
+        });
+    });
+
+    // Initialize sliders to call uiInterface.setVolume
+    const sliderMap = [
+        { id: 'slider-music', channel: 'music' },
+        { id: 'slider-ambient', channel: 'ambient' },
+        { id: 'slider-sfx', channel: 'sfx' }
+    ];
+    sliderMap.forEach(item => {
+        const el = document.getElementById(item.id);
+        if (!el) return;
+        el.addEventListener('input', (ev) => {
+            const raw = Number(ev.target.value || 0);
+            const norm = Math.min(Math.max(raw / 100, 0), 1);
+            if (window.uiInterface && typeof uiInterface.setVolume === 'function') {
+                uiInterface.setVolume(item.channel, norm);
+            }
+        });
+    });
+
+    // Default active state: mark assets file-item active and show assets view
+    switchToolTab('tab-assets');
+}
 
 function switchView(viewName) {
     const allViews = document.querySelectorAll('.view');
@@ -143,11 +211,24 @@ const uiInterface = {
     setVolume: (channel, volume) => audioManager.setVolume(channel, volume)
 };
 
-// --- MOCK DE IA ---
+// --- GENERADOR DE IMÁGENES CON POLLINATIONS.AI ---
 async function callImageAPI(prompt) {
-    console.log(`Llamando a la API de IA para: ${prompt}`);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    return `https://picsum.photos/seed/${encodeURI(prompt)}/1024/768`;
+    console.log(`Generando imagen con Pollinations.ai para: ${prompt}`);
+    
+    // Codificar el prompt para URL
+    const encodedPrompt = encodeURIComponent(prompt);
+    
+    // Generar seed aleatorio para variabilidad
+    const seed = Math.floor(Math.random() * 1000000);
+    
+    // Construir URL de Pollinations.ai
+    // - model: "flux" para alta calidad, "turbo" para velocidad
+    // - width/height: paisaje 1280x720
+    // - seed: número aleatorio para diferentes resultados
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&model=flux&seed=${seed}`;
+    
+    console.log(`URL generada: ${imageUrl}`);
+    return imageUrl;
 }
 
 
@@ -302,36 +383,164 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- HANDLER DE ASSETS ---
+    // --- HANDLER DE ASSETS / BIBLIOTECAS ---
     const assetUrlInput = document.getElementById('asset-url-input');
     const assetUrlBtn = document.getElementById('asset-url-btn');
     const assetFileInput = document.getElementById('asset-file-input');
     const assetOutputContainer = document.getElementById('asset-output-container');
     const assetOutputText = document.getElementById('asset-output-text');
 
+    // Libraries stored in localStorage for persistence
+    const STORAGE_KEYS = { ASSETS: 'vn_assets', AUDIO: 'vn_audio', SCRIPTS: 'vn_scripts' };
+    let assetsLib = [];
+    let audioLib = [];
+    let scriptsLib = [];
+
+    function loadLibraries() {
+        try { assetsLib = JSON.parse(localStorage.getItem(STORAGE_KEYS.ASSETS) || '[]'); } catch(e){ assetsLib = []; }
+        try { audioLib = JSON.parse(localStorage.getItem(STORAGE_KEYS.AUDIO) || '[]'); } catch(e){ audioLib = []; }
+        try { scriptsLib = JSON.parse(localStorage.getItem(STORAGE_KEYS.SCRIPTS) || '[]'); } catch(e){ scriptsLib = []; }
+    }
+    function saveLibraries() {
+        localStorage.setItem(STORAGE_KEYS.ASSETS, JSON.stringify(assetsLib));
+        localStorage.setItem(STORAGE_KEYS.AUDIO, JSON.stringify(audioLib));
+        localStorage.setItem(STORAGE_KEYS.SCRIPTS, JSON.stringify(scriptsLib));
+    }
+
+    function renderAssetsLibrary() {
+        const container = document.getElementById('assets-library');
+        if (!container) return;
+        container.innerHTML = '';
+        assetsLib.forEach((it, idx) => {
+            const row = document.createElement('div');
+            row.style.display = 'flex'; row.style.gap = '8px'; row.style.alignItems = 'center';
+            row.style.padding = '6px'; row.style.background = '#0d0d0d'; row.style.border = '1px solid #222'; row.style.borderRadius = '4px';
+
+            const thumb = document.createElement('img');
+            thumb.src = it.url; thumb.style.width = '64px'; thumb.style.height = '40px'; thumb.style.objectFit = 'cover'; thumb.style.borderRadius = '3px';
+            const name = document.createElement('div'); name.textContent = it.name || (`asset-${idx}`); name.style.flex = '1'; name.style.fontSize = '12px'; name.style.color = 'var(--text-secondary)';
+
+            const btnCopy = document.createElement('button'); btnCopy.className = 'asset-btn'; btnCopy.style.padding='4px 8px'; btnCopy.textContent = 'Copiar';
+            btnCopy.addEventListener('click', ()=>{ navigator.clipboard.writeText(it.url).catch(()=>{}); assetOutputContainer.style.display='block'; assetOutputText.textContent = `"${it.url}"`; });
+
+            const btnInsert = document.createElement('button'); btnInsert.className='asset-btn'; btnInsert.style.padding='4px 8px'; btnInsert.textContent='Insertar';
+            btnInsert.addEventListener('click', ()=>{ const ta = document.getElementById('script-input'); if (ta) { const val = `"${it.url}"`; const start = ta.selectionStart||0; const end = ta.selectionEnd||0; ta.setRangeText(val, start, end, 'end'); ta.focus(); } });
+
+            const btnDel = document.createElement('button'); btnDel.className='asset-btn'; btnDel.style.padding='4px 8px'; btnDel.textContent='Eliminar';
+            btnDel.addEventListener('click', ()=>{ assetsLib.splice(idx,1); saveLibraries(); renderAssetsLibrary(); });
+
+            row.appendChild(thumb); row.appendChild(name); row.appendChild(btnCopy); row.appendChild(btnInsert); row.appendChild(btnDel);
+            container.appendChild(row);
+        });
+    }
+
+    function renderAudioLibrary() {
+        const container = document.getElementById('audio-library');
+        if (!container) return;
+        container.innerHTML = '';
+        audioLib.forEach((it, idx) => {
+            const row = document.createElement('div');
+            row.style.display = 'flex'; row.style.gap = '8px'; row.style.alignItems = 'center'; row.style.padding='6px';
+
+            const name = document.createElement('div'); name.textContent = it.name || (`audio-${idx}`); name.style.flex='1'; name.style.fontSize='12px'; name.style.color='var(--text-secondary)';
+            const btnPlay = document.createElement('button'); btnPlay.className='asset-btn'; btnPlay.textContent='▶'; btnPlay.style.padding='4px 8px';
+            btnPlay.addEventListener('click', ()=>{ audioManager.playSfx(it.url, { volume: 1.0 }); });
+            const btnCopy = document.createElement('button'); btnCopy.className='asset-btn'; btnCopy.textContent='Copiar'; btnCopy.style.padding='4px 8px';
+            btnCopy.addEventListener('click', ()=>{ navigator.clipboard.writeText(it.url).catch(()=>{}); assetOutputContainer.style.display='block'; assetOutputText.textContent = `"${it.url}"`; });
+            const btnDel = document.createElement('button'); btnDel.className='asset-btn'; btnDel.textContent='Eliminar'; btnDel.style.padding='4px 8px';
+            btnDel.addEventListener('click', ()=>{ audioLib.splice(idx,1); saveLibraries(); renderAudioLibrary(); });
+
+            row.appendChild(name); row.appendChild(btnPlay); row.appendChild(btnCopy); row.appendChild(btnDel);
+            container.appendChild(row);
+        });
+    }
+
+    function renderScriptsLibrary() {
+        const container = document.getElementById('scripts-library');
+        if (!container) return;
+        container.innerHTML = '';
+        scriptsLib.forEach((it, idx) => {
+            const row = document.createElement('div');
+            row.style.display='flex'; row.style.gap='8px'; row.style.alignItems='center'; row.style.padding='6px';
+            const name = document.createElement('div'); name.textContent = it.name || (`script-${idx}`); name.style.flex='1'; name.style.fontSize='12px'; name.style.color='var(--text-secondary)';
+            const btnLoad = document.createElement('button'); btnLoad.className='asset-btn'; btnLoad.textContent='Cargar'; btnLoad.style.padding='4px 8px';
+            btnLoad.addEventListener('click', ()=>{ const ta = document.getElementById('script-input'); if (ta) { ta.value = it.content; ta.dispatchEvent(new Event('input')); switchToolTab('tab-assets'); } });
+            const btnExport = document.createElement('button'); btnExport.className='asset-btn'; btnExport.textContent='Export'; btnExport.style.padding='4px 8px';
+            btnExport.addEventListener('click', ()=>{ const blob = new Blob([it.content], {type:'text/plain'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = it.name || 'script.game'; a.click(); URL.revokeObjectURL(url); });
+            const btnDel = document.createElement('button'); btnDel.className='asset-btn'; btnDel.textContent='Eliminar'; btnDel.style.padding='4px 8px'; btnDel.addEventListener('click', ()=>{ scriptsLib.splice(idx,1); saveLibraries(); renderScriptsLibrary(); });
+
+            row.appendChild(name); row.appendChild(btnLoad); row.appendChild(btnExport); row.appendChild(btnDel);
+            container.appendChild(row);
+        });
+    }
+
+    function addAssetObject(name, url, type) {
+        if (type === 'audio') { audioLib.unshift({ name, url }); }
+        else { assetsLib.unshift({ name, url }); }
+        saveLibraries(); renderAssetsLibrary(); renderAudioLibrary();
+    }
+
     function showAndCopyAsset(url) {
         const textToCopy = `"${url}"`;
         assetOutputText.textContent = textToCopy;
         assetOutputContainer.style.display = 'block';
         navigator.clipboard.writeText(url).catch(err => console.error(err));
+        // try to guess type from extension
+        const ext = url.split('.').pop().toLowerCase().split(/[?#]/)[0] || '';
+        const audioExt = ['mp3','ogg','wav','m4a','aac'];
+        const imageExt = ['png','jpg','jpeg','gif','webp','svg'];
+        if (audioExt.includes(ext)) addAssetObject(url.split('/').pop(), url, 'audio');
+        else addAssetObject(url.split('/').pop(), url, 'image');
     }
 
     if (assetUrlBtn) {
         assetUrlBtn.addEventListener('click', () => {
             const url = assetUrlInput.value.trim();
-            if (url) showAndCopyAsset(url);
+            if (url) { showAndCopyAsset(url); assetUrlInput.value = ''; renderAssetsLibrary(); renderAudioLibrary(); }
         });
     }
     if (assetFileInput) {
         assetFileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                const blobUrl = URL.createObjectURL(file);  
-                showAndCopyAsset(blobUrl);
+                const blobUrl = URL.createObjectURL(file);
+                // classify by mime
+                if (file.type && file.type.startsWith('audio/')) addAssetObject(file.name, blobUrl, 'audio');
+                else addAssetObject(file.name, blobUrl, 'image');
+                // also expose to user
+                assetOutputContainer.style.display = 'block'; assetOutputText.textContent = `"${blobUrl}"`;
                 assetFileInput.value = null;
             }
         });
     }
+
+    // Scripts library controls
+    const btnSaveScript = document.getElementById('btn-save-script');
+    const btnImportScript = document.getElementById('btn-import-script');
+    if (btnSaveScript) {
+        btnSaveScript.addEventListener('click', ()=>{
+            const ta = document.getElementById('script-input');
+            if (!ta) return;
+            const name = prompt('Nombre para el script (ej: aventura1.game):', `script-${Date.now()}.game`);
+            if (!name) return;
+            scriptsLib.unshift({ name, content: ta.value });
+            saveLibraries(); renderScriptsLibrary();
+        });
+    }
+    if (btnImportScript) {
+        btnImportScript.addEventListener('click', ()=>{
+            const input = document.createElement('input'); input.type='file'; input.accept='.game,text/*';
+            input.addEventListener('change', (ev)=>{
+                const f = ev.target.files[0]; if (!f) return; const reader = new FileReader();
+                reader.onload = () => { const txt = reader.result; scriptsLib.unshift({ name: f.name || `import-${Date.now()}.game`, content: txt }); saveLibraries(); renderScriptsLibrary(); };
+                reader.readAsText(f);
+            });
+            input.click();
+        });
+    }
+
+    // Initialize libraries UI
+    loadLibraries(); renderAssetsLibrary(); renderAudioLibrary(); renderScriptsLibrary();
 
     // ========================================================
     // --- MÓDULO DE ROBOT IA Y ANÁLISIS ---

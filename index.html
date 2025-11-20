@@ -43,20 +43,67 @@
                     </div>
                     <div class="panel-content">
                         <div class="file-tree">
-                            <div class="file-item"><span class="file-icon">📄</span><span>script.game</span></div>
+                            <div class="file-item"><span class="file-icon">📄</span><span>Scripts</span></div>
                             <div class="file-item"><span class="file-icon">🖼️</span><span>assets</span></div>
                             <div class="file-item"><span class="file-icon">🔊</span><span>audio</span></div>
                         </div>
                         <hr style="margin: 15px 0; border: none; border-top: 1px solid #333;">
-                        <h4>Gestor de Assets</h4>
-                        <input type="text" id="asset-url-input" placeholder="Link de imagen/audio..." class="asset-input">
-                        <button id="asset-url-btn" class="asset-btn">Usar Link</button>
-                        <label for="asset-file-input" class="asset-btn" style="margin-top:5px; display:block; text-align:center;">📁 Subir Archivo</label>
-                        <input type="file" id="asset-file-input" accept="image/*, audio/*" style="display: none;">
-                        <div id="asset-output-container" style="display:none; margin-top: 10px; padding: 10px; background: #222; border: 1px solid var(--accent-neon);">
-                            <p style="font-size: 10px; margin: 0; color: var(--accent-neon);">✓ URL Copiada:</p>
-                            <code id="asset-output-text" style="font-size: 10px; word-break: break-all; color: var(--accent-cyan);"></code>
+
+                        <!-- Tools Panel: Views (tabs triggered by the file list above) -->
+                        <div id="tools-panel">
+                            <div id="tools-views">
+                                <!-- Assets view (moved from previous asset manager) -->
+                                <div class="tool-view" id="tab-assets">
+                                    <h4>Gestor de Assets</h4>
+                                    <input type="text" id="asset-url-input" placeholder="Link de imagen/audio..." class="asset-input">
+                                    <button id="asset-url-btn" class="asset-btn">Usar Link</button>
+                                    <label for="asset-file-input" class="asset-btn" style="margin-top:5px; display:block; text-align:center;">📁 Subir Archivo</label>
+                                    <input type="file" id="asset-file-input" accept="image/*, audio/*" style="display: none;">
+                                    <div id="asset-output-container" style="display:none; margin-top: 10px; padding: 10px; background: #222; border: 1px solid var(--accent-neon);">
+                                        <p style="font-size: 10px; margin: 0; color: var(--accent-neon);">✓ URL Copiada:</p>
+                                        <code id="asset-output-text" style="font-size: 10px; word-break: break-all; color: var(--accent-cyan);"></code>
+                                    </div>
+
+                                    <hr style="margin:10px 0; border-top:1px solid #222;">
+                                    <h4 style="margin-top:6px;">Biblioteca</h4>
+                                    <div id="assets-library" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                                </div>
+
+                                <!-- Audio Mixer view -->
+                                <div class="tool-view" id="tab-audio" style="display:none;">
+                                    <h4>Mezclador de Audio</h4>
+                                    <div class="audio-mixer">
+                                        <div class="mixer-channel">
+                                            <label for="slider-music">Música</label>
+                                            <input type="range" id="slider-music" min="0" max="100" value="50">
+                                        </div>
+                                        <div class="mixer-channel">
+                                            <label for="slider-ambient">Ambiente</label>
+                                            <input type="range" id="slider-ambient" min="0" max="100" value="40">
+                                        </div>
+                                        <div class="mixer-channel">
+                                            <label for="slider-sfx">SFX</label>
+                                            <input type="range" id="slider-sfx" min="0" max="100" value="80">
+                                        </div>
+                                    </div>
+
+                                    <hr style="margin:10px 0; border-top:1px solid #222;">
+                                    <h4 style="margin-top:6px;">Biblioteca de Audios</h4>
+                                    <div id="audio-library" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                                </div>
+
+                                <!-- Info view -->
+                                <div class="tool-view" id="tab-scripts" style="display:none;">
+                                    <h4>Biblioteca de Scripts</h4>
+                                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                                        <button id="btn-save-script" class="asset-btn" style="width:50%;">Guardar Script Actual</button>
+                                        <button id="btn-import-script" class="asset-btn" style="width:50%;">Importar (.game)</button>
+                                    </div>
+                                    <div id="scripts-library" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 

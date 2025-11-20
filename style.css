@@ -212,6 +212,14 @@ code, pre, textarea {
     transform: translateX(5px);
 }
 
+/* Active state for file items used as tools tabs */
+.file-item.active {
+    background: linear-gradient(90deg, rgba(0,255,65,0.06), rgba(0,255,255,0.03));
+    border-color: var(--accent-neon);
+    box-shadow: 0 0 12px rgba(0,255,65,0.04) inset;
+    transform: none;
+}
+
 /* ASSETS */
 h4 { font-size: 11px; text-transform: uppercase; color: var(--accent-neon); margin-bottom: 10px; }
 
@@ -224,6 +232,30 @@ h4 { font-size: 11px; text-transform: uppercase; color: var(--accent-neon); marg
 .asset-input:focus { border-color: var(--accent-neon); box-shadow: 0 0 15px rgba(0, 255, 65, 0.4); }
 .asset-btn { background: linear-gradient(90deg, var(--accent-neon), var(--accent-cyan)); color: #000; font-weight: 600; border: none; }
 .asset-btn:hover { transform: translateY(-2px); }
+
+/* --- Tools Panel (Tab Bar + Views) --- */
+#tools-panel { margin-top: 10px; }
+.tools-tab-bar {
+    display: flex; gap: 6px; margin-bottom: 10px; align-items: center;
+}
+.tool-tab-btn {
+    padding: 6px 10px; background: #141414; border: 1px solid #333;
+    color: var(--text-secondary); font-size: 12px; border-radius: 4px; cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+.tool-tab-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); box-shadow: 0 0 8px rgba(0,255,255,0.06); }
+.tool-tab-btn.active {
+    background: linear-gradient(90deg, var(--accent-neon), var(--accent-cyan));
+    color: #000; border-color: var(--accent-neon); font-weight: 700;
+}
+.tool-view { display: block; transition: opacity 0.18s ease-in-out; }
+.tool-view[style*="display:none"] { opacity: 0; }
+
+.audio-mixer { display: flex; gap: 10px; align-items: center; }
+.mixer-channel { display:flex; flex-direction: column; gap:6px; background: #111; padding:8px; border-radius:6px; border:1px solid #222; width:100%; }
+.mixer-channel label { font-size:11px; color:var(--accent-cyan); }
+.mixer-channel input[type=range] { width:100%; }
+
 
 /* --- CODE PANEL (Col 2) --- */
 #code-panel { grid-column: 2; }
