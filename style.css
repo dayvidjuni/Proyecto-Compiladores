@@ -1,6 +1,6 @@
 /* ========================================
    VISUAL NOVEL STUDIO - ESTILO URBANO NEON
-   Tech-Noir Theme (Bright Neon Edition)
+   Tech-Noir Theme (Bright Neon Edition) v1.7
    ======================================== */
 
 /* --- RESET Y VARIABLES GLOBALES --- */
@@ -8,7 +8,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    outline: none; /* Eliminamos outline por defecto para limpieza */
+    outline: none;
 }
 
 :root {
@@ -16,27 +16,29 @@
     --secondary-dark: #1a1a1a;
     --tertiary-dark: #252525;
     --border-dark: #333333;
+    
     --accent-neon: #00ff41;
     --accent-cyan: #00ffff;
     --accent-magenta: #ff00ff;
     --accent-orange: #ff6600;
     --accent-purple: #9d4edd;
+    
     --text-primary: #ffffff;
     --text-secondary: #b0b0b0;
     --bg-glow: rgba(0, 255, 65, 0.1);
 }
 
-/* --- TIPOGRAFÍA --- */
+/* --- TIPOGRAFÍA Y BODY --- */
 html, body {
     margin: 0;
     padding: 0;
-    height: 100vh; /* Altura fija viewport */
+    height: 100vh;
     width: 100vw;
     font-family: 'Inter', sans-serif;
     background-color: var(--primary-dark);
     color: var(--text-primary);
-    overflow: hidden; /* CRUCIAL: Evita que la página entera haga scroll */
-    display: flex; /* Layout principal flex */
+    overflow: hidden; /* Evita scroll en la página entera */
+    display: flex;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -45,6 +47,7 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: 1px;
     color: var(--accent-neon);
     text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    margin-bottom: 10px;
 }
 
 code, pre, textarea {
@@ -53,10 +56,9 @@ code, pre, textarea {
 }
 
 /* ========================================
-   LAYOUT PRINCIPAL - SIDEBAR + CONTENT
+   LAYOUT PRINCIPAL (SIDEBAR + CONTENIDO)
    ======================================== */
 
-/* --- MAIN NAVIGATION (SIDEBAR IZQUIERDO) --- */
 #main-nav {
     width: 70px;
     height: 100vh;
@@ -69,7 +71,7 @@ code, pre, textarea {
     padding: 20px 0;
     z-index: 1000;
     box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
-    flex-shrink: 0; /* No encoger */
+    flex-shrink: 0;
 }
 
 #main-nav .nav-top,
@@ -99,7 +101,7 @@ code, pre, textarea {
 .nav-btn:hover {
     background-color: rgba(0, 255, 255, 0.1);
     color: var(--accent-cyan);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
     border-color: var(--accent-neon);
 }
 
@@ -107,27 +109,27 @@ code, pre, textarea {
     background: linear-gradient(135deg, var(--accent-neon), var(--accent-cyan));
     color: #000;
     border-color: var(--accent-neon);
-    box-shadow: 0 0 30px var(--accent-neon), 0 0 60px rgba(0, 255, 65, 0.5);
+    box-shadow: 0 0 30px var(--accent-neon);
     font-weight: bold;
 }
 
-/* --- APP CONTENT CONTAINER --- */
 #app-content {
-    flex: 1; /* Ocupa el resto del ancho */
+    flex: 1;
     height: 100vh;
     background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
     position: relative;
-    overflow: hidden; /* Manejo de scroll interno en las vistas */
+    overflow: hidden;
 }
 
 /* ========================================
-   VISTAS (VIEWS)
+   VISTAS (SISTEMA DE PESTAÑAS)
    ======================================== */
 
 .view {
     display: none;
     width: 100%;
     height: 100%;
+    overflow: hidden;
 }
 
 .view-active {
@@ -136,12 +138,12 @@ code, pre, textarea {
 }
 
 /* ========================================
-   VISTA 1: EDITOR (GRID MEJORADO)
+   VISTA EDITOR (GRID DE 3 COLUMNAS)
    ======================================== */
 
 #view-editor .editor-grid {
     display: grid;
-    /* Columna 3 (Preview) fijada a 450px para estabilidad, Central flexible */
+    /* Columnas: Proyecto (220px) | Editor (Flexible) | Preview (450px) */
     grid-template-columns: 220px 1fr 450px; 
     gap: 0;
     height: 100%;
@@ -149,13 +151,13 @@ code, pre, textarea {
     border-bottom: 2px solid var(--accent-neon);
 }
 
-/* PANELES GENERALES */
+/* ESTILOS DE PANEL GENÉRICO */
 .panel {
     display: flex;
     flex-direction: column;
     background-color: var(--secondary-dark);
     border-right: 2px solid var(--accent-cyan);
-    min-height: 0; /* CRUCIAL: Permite que el scroll funcione dentro de flex items */
+    min-height: 0; 
     overflow: hidden;
 }
 
@@ -165,13 +167,13 @@ code, pre, textarea {
 
 .panel-header {
     padding: 10px 15px;
-    height: 50px; /* Altura fija */
+    height: 50px;
     background: linear-gradient(90deg, var(--tertiary-dark), var(--secondary-dark));
     border-bottom: 2px solid var(--accent-neon);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-shrink: 0; /* No encoger el header */
+    flex-shrink: 0;
 }
 
 .panel-header h3 {
@@ -186,52 +188,37 @@ code, pre, textarea {
 .panel-content {
     flex: 1;
     padding: 15px;
-    overflow-y: auto; /* Scroll vertical si hace falta */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
 }
 
-/* --- PROJECT PANEL (Col 1) --- */
+/* --- COLUMNA 1: PROYECTO --- */
 #project-panel { grid-column: 1; }
 
 .file-tree { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-
 .file-item {
-    padding: 10px 12px;
-    background-color: var(--tertiary-dark);
-    border: 1px solid var(--accent-cyan);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex; align-items: center; gap: 10px;
-    font-size: 12px; color: var(--text-primary); font-weight: 500;
+    padding: 10px 12px; background-color: var(--tertiary-dark);
+    border: 1px solid var(--accent-cyan); border-radius: 4px; cursor: pointer;
+    transition: 0.2s; display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: var(--text-primary);
 }
-.file-item:hover {
-    background-color: rgba(0, 255, 255, 0.1);
-    border-color: var(--accent-neon);
-    transform: translateX(5px);
-}
+.file-item:hover { background-color: rgba(0,255,255,0.1); border-color: var(--accent-neon); }
 
-/* ASSETS */
 h4 { font-size: 11px; text-transform: uppercase; color: var(--accent-neon); margin-bottom: 10px; }
-
-.asset-input, .asset-btn {
-    width: 100%; padding: 8px 10px; margin-bottom: 7px;
-    font-family: 'Inter', sans-serif; font-size: 11px;
-    background-color: var(--tertiary-dark); border: 1px solid var(--accent-cyan);
-    color: var(--text-primary); border-radius: 3px; cursor: pointer; transition: 0.2s;
+.asset-input {
+    width: 100%; padding: 8px; margin-bottom: 7px; background: var(--tertiary-dark);
+    border: 1px solid var(--accent-cyan); color: #fff; border-radius: 3px; font-size: 11px;
 }
-.asset-input:focus { border-color: var(--accent-neon); box-shadow: 0 0 15px rgba(0, 255, 65, 0.4); }
-.asset-btn { background: linear-gradient(90deg, var(--accent-neon), var(--accent-cyan)); color: #000; font-weight: 600; border: none; }
-.asset-btn:hover { transform: translateY(-2px); }
+.asset-btn {
+    width: 100%; padding: 8px; background: linear-gradient(90deg, var(--accent-neon), var(--accent-cyan));
+    color: #000; border: none; font-weight: 600; cursor: pointer; font-size: 11px;
+}
+.asset-btn:hover { transform: translateY(-1px); }
 
-/* --- CODE PANEL (Col 2) --- */
+/* --- COLUMNA 2: EDITOR DE CÓDIGO (FIX CRITICO) --- */
 #code-panel { grid-column: 2; }
-
-#code-panel .panel-content {
-    padding: 0; /* Sin padding para maximizar editor */
-    overflow: hidden; /* El scroll lo maneja el wrapper interno */
-}
+#code-panel .panel-content { padding: 0; overflow: hidden; }
 
 .editor-wrapper {
     display: flex;
@@ -241,87 +228,102 @@ h4 { font-size: 11px; text-transform: uppercase; color: var(--accent-neon); marg
     position: relative;
 }
 
+/* Barra lateral de números */
 .line-numbers {
     background-color: var(--secondary-dark);
     border-right: 1px solid var(--accent-cyan);
     padding: 10px 5px;
     text-align: right;
     color: var(--accent-cyan);
-    font-size: 13px;
-    line-height: 20px; /* Sincronizado con el editor */
+    
+    /* Sincronización Tipográfica */
+    font-family: 'Fira Code', monospace;
+    font-size: 14px; 
+    line-height: 24px; 
+    
     min-width: 50px;
     user-select: none;
-    overflow: hidden;
+    overflow: hidden; /* Scroll controlado por JS */
 }
 
-/* Contenedor para el textarea y el highlighter superpuestos */
+/* Contenedor de las capas superpuestas */
 .code-container {
     position: relative;
     flex: 1;
     height: 100%;
-    overflow: auto; /* Scroll aquí */
+    overflow: hidden; /* El scroll lo maneja el textarea */
+    background-color: #0f0f0f;
 }
 
-#script-input, .syntax-highlight {
+/* --- ESTILOS COMPARTIDOS (TEXTAREA + HIGHLIGHT) --- */
+/* Esto asegura que el texto y el color coincidan pixel a pixel */
+#script-input, 
+#syntax-highlight {
     position: absolute;
     top: 0; left: 0;
-    width: 100%; min-height: 100%;
-    margin: 0; padding: 10px;
+    width: 100%; height: 100%;
+    margin: 0; 
     border: none;
-    font-family: 'Fira Code', monospace;
-    font-size: 13px;
-    line-height: 20px; /* Sincronizado */
-    white-space: pre; /* Evita wrap para no romper alineación */
+    box-sizing: border-box;
+    
+    /* IMPORTANTE: Padding idéntico para ambos */
+    padding: 10px 15px 100px 15px; 
+    
+    /* IMPORTANTE: Tipografía idéntica */
+    font-family: 'Fira Code', monospace !important;
+    font-size: 14px !important;
+    line-height: 24px !important;
+    letter-spacing: 0px;
+    white-space: pre;
     tab-size: 4;
+    word-wrap: normal;
+    overflow: auto; /* Ambos con propiedad de scroll para cálculo de caja */
 }
 
-.syntax-highlight {
+/* Capa Inferior: Colores (Visual) */
+#syntax-highlight {
     z-index: 1;
-    color: transparent; /* Texto base invisible */
-    pointer-events: none;
+    color: #fff;          /* Color base */
+    background: transparent;
+    pointer-events: none; /* Deja pasar clicks al input */
+    
+    /* Ocultamos scrollbar visual en la capa de fondo */
+    scrollbar-width: none;
 }
+#syntax-highlight::-webkit-scrollbar { display: none; }
+
+/* Capa Superior: Escritura (Lógica) */
 #script-input {
     z-index: 2;
+    color: transparent !important; /* TEXTO INVISIBLE PARA EVITAR FANTASMAS */
     background: transparent;
-    color: transparent; /* Texto invisible, caret visible */
-    caret-color: var(--accent-neon);
+    caret-color: var(--accent-neon); /* Cursor visible */
     resize: none;
 }
-#script-input::selection { background: rgba(0, 255, 65, 0.3); color: transparent; }
+/* Selección visible */
+#script-input::selection { background: rgba(0, 255, 65, 0.2); color: transparent; }
 
-/* Colores Sintaxis */
-.syntax-highlight .keyword-primary { color: #00ff41; font-weight: 700; }
-.syntax-highlight .keyword-secondary { color: #00e5ff; }
-.syntax-highlight .keyword-control { color: #ff1493; font-weight: 700; }
-.syntax-highlight .string { color: #f1fa8c; font-style: italic; }
-.syntax-highlight .number { color: #ffaa00; }
-.syntax-highlight .comment { color: #5a7c5f; }
 
+/* Botón Compilar */
 .compile-btn {
-    padding: 6px 12px;
-    background: linear-gradient(90deg, var(--accent-neon), var(--accent-cyan));
-    color: #000; border: none; border-radius: 3px;
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+    padding: 6px 12px; background: linear-gradient(90deg, var(--accent-neon), var(--accent-cyan));
+    color: #000; border: none; border-radius: 3px; font-weight: 700; font-size: 11px; cursor: pointer;
 }
-.compile-btn:hover { transform: translateY(-1px); box-shadow: 0 0 25px rgba(0, 255, 65, 0.8); }
 
-
-/* --- PANEL DERECHO DIVIDIDO (Col 3) --- */
+/* --- COLUMNA 3: PREVIEW & MAPA --- */
 #right-split-panel {
     grid-column: 3;
     display: flex;
-    flex-direction: column; /* División Vertical */
+    flex-direction: column;
 }
 
-/* Sección Superior: Preview (Juego) */
+/* Sección Preview (Arriba) */
 #preview-section {
-    flex: 0 0 55%; /* 55% de altura */
-    display: flex;
-    flex-direction: column;
+    flex: 0 0 60%; /* 60% de altura */
+    display: flex; flex-direction: column;
     border-bottom: 2px solid var(--accent-neon);
-    min-height: 200px;
     position: relative;
+    min-height: 200px;
 }
 
 #game-screen {
@@ -329,112 +331,110 @@ h4 { font-size: 11px; text-transform: uppercase; color: var(--accent-neon); marg
     background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
     position: relative;
     display: flex; flex-direction: column; justify-content: flex-end;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
 }
 
 #character-layer {
     position: absolute; inset: 0;
-    display: flex; justify-content: center; align-items: flex-end;
-    pointer-events: none;
+    pointer-events: none; z-index: 5;
 }
 
 #dialogue-box {
     background: rgba(15, 15, 15, 0.95);
     border-top: 2px solid var(--accent-neon);
-    padding: 15px;
-    min-height: 130px;
-    z-index: 5;
-    display: flex; flex-direction: column;
+    padding: 15px; min-height: 140px;
+    z-index: 10; display: flex; flex-direction: column;
 }
 
-#speaker-name { color: var(--accent-cyan); font-weight: 700; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; }
-#dialogue-text { color: #fff; font-size: 13px; line-height: 1.5; margin-bottom: 10px; }
+#speaker-name { color: var(--accent-cyan); font-weight: 700; margin-bottom: 5px; font-size: 12px; text-transform: uppercase; }
+#dialogue-text { color: #fff; margin-bottom: 10px; font-size: 14px; line-height: 1.5; }
 
-#choice-buttons { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
 .choice-btn {
     background: var(--tertiary-dark); border: 1px solid var(--accent-neon);
-    color: var(--accent-neon); padding: 6px; font-size: 11px; text-align: left;
-    cursor: pointer; border-radius: 2px;
+    color: var(--accent-neon); padding: 8px; margin-bottom: 5px;
+    cursor: pointer; text-align: left; font-size: 12px; border-radius: 3px;
 }
 .choice-btn:hover { background: var(--accent-neon); color: #000; }
 
 #continue-btn {
     align-self: flex-end; width: 30px; height: 30px;
     background: var(--accent-neon); border: none; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-weight: bold;
+    font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
 
-/* Controles de Tiempo (Undo/Redo) */
 .preview-controls { display: flex; gap: 5px; }
 .control-btn {
-    width: 25px; height: 25px;
-    background: rgba(0,0,0,0.5); border: 1px solid var(--accent-cyan);
-    color: var(--accent-cyan); display: flex; align-items: center; justify-content: center;
-    cursor: pointer; border-radius: 3px;
+    background: #333; border: 1px solid #555; color: #fff; 
+    width: 25px; height: 25px; cursor: pointer; display: flex; 
+    align-items: center; justify-content: center;
 }
-.control-btn:hover { background: var(--accent-cyan); color: #000; }
+.control-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
 
-/* Sección Inferior: Flowchart (Mapa) */
+/* Sección Mapa (Abajo) */
 #flow-section {
-    flex: 1; /* Ocupa el resto */
-    display: flex;
-    flex-direction: column;
-    background: #111;
-    min-height: 0; /* Permite scroll */
+    flex: 1; display: flex; flex-direction: column;
+    background: #111; min-height: 0;
 }
-
-#mini-map-container {
-    flex: 1;
-    overflow: auto; /* Scroll para el mapa */
-    padding: 10px;
-    display: flex; justify-content: center;
-}
+#mini-map-container { flex: 1; overflow: auto; padding: 10px; display: flex; justify-content: center; }
 .mermaid { width: 100%; display: flex; justify-content: center; }
 
 
 /* ========================================
-   VISTA 2: ANÁLISIS (ROBOT IA)
+   VISTAS SECUNDARIAS (ANÁLISIS, COMUNIDAD, DOCS)
    ======================================== */
-.analysis-layout { padding: 20px; background: #0f0f0f; height: 100%; display: flex; flex-direction: column; }
-.analysis-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid var(--accent-neon); padding-bottom: 10px; }
 
+/* Vista Análisis */
+.analysis-layout { padding: 20px; height: 100%; display: flex; flex-direction: column; }
+.analysis-header { display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333; }
 .analysis-content { display: flex; gap: 20px; flex: 1; min-height: 0; }
+.stats-panel { width: 280px; background: #1a1a1a; border: 1px solid var(--accent-cyan); padding: 15px; overflow: auto; }
+.graph-panel { flex: 1; background: #151515; border: 1px solid #333; overflow: auto; padding: 20px; display: flex; justify-content: center; align-items: flex-start; }
+.stat-card { background: #222; padding: 10px; margin-bottom: 8px; border-radius: 4px; text-align: center; }
 
-.stats-panel {
-    width: 280px; background: #1a1a1a; border: 1px solid var(--accent-cyan);
-    padding: 15px; overflow-y: auto; border-radius: 5px;
-}
+/* Vista Comunidad */
+#view-community { padding: 40px; background: linear-gradient(135deg, #0f0f0f, #1a1a1a); overflow: auto; }
+.stories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+.story-card { background: #1a1a1a; border: 1px solid var(--accent-cyan); padding: 20px; text-align: center; cursor: pointer; }
+.story-card:hover { border-color: var(--accent-neon); transform: translateY(-2px); transition: 0.2s; }
+.story-image { font-size: 40px; margin-bottom: 10px; }
 
-.stat-card { background: #252525; padding: 10px; text-align: center; border-radius: 4px; margin-bottom: 5px; }
-
-.graph-panel {
-    flex: 1; background: #151515; border: 1px solid #333;
-    border-radius: 5px; overflow: auto; padding: 20px;
-    display: flex; justify-content: center; align-items: flex-start;
-}
-
-/* ========================================
-   OTRAS VISTAS (Docs, Profile, Community)
-   ======================================== */
-#view-community, #view-profile { padding: 40px; overflow-y: auto; }
-.stories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-.story-card { background: var(--secondary-dark); border: 1px solid var(--accent-cyan); border-radius: 4px; overflow: hidden; }
-.story-image { height: 120px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-.story-info { padding: 10px; }
-
+/* Vista Docs */
 #view-docs { display: flex; }
-.docs-sidebar { width: 200px; background: var(--tertiary-dark); padding: 20px; border-right: 1px solid var(--accent-neon); }
-.docs-content { flex: 1; padding: 40px; overflow-y: auto; }
+.docs-sidebar { width: 200px; background: #151515; padding: 20px; border-right: 1px solid var(--accent-neon); }
+.docs-content { flex: 1; padding: 40px; overflow: auto; }
+.toc-link { display: block; color: var(--accent-cyan); padding: 5px 0; text-decoration: none; }
+.toc-link:hover { color: var(--accent-neon); }
+
+/* Vista Perfil */
+#view-profile { padding: 40px; }
 
 /* ========================================
-   SCROLLBARS
+   SCROLLBARS PERSONALIZADOS
    ======================================== */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0f0f0f; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0f0f0f; border-left: 1px solid #333; }
+::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; border: 1px solid #0f0f0f; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
 
-/* Responsive */
+/* ========================================
+   RESPONSIVE MEDIA QUERIES
+   ======================================== */
 @media (max-width: 1000px) {
-    #view-editor .editor-grid { grid-template-columns: 1fr 350px; }
-    #project-panel { display: none; }
+    #view-editor .editor-grid { 
+        grid-template-columns: 1fr 350px; 
+    }
+    #project-panel { display: none; } /* Ocultar panel proyecto en pantallas medianas */
+}
+
+@media (max-width: 768px) {
+    #main-nav { width: 50px; }
+    .nav-btn { width: 40px; height: 40px; font-size: 18px; }
+    #view-editor .editor-grid { 
+        grid-template-columns: 1fr; 
+        grid-template-rows: 1fr 300px; /* Editor arriba, Preview abajo */
+    }
+    #right-split-panel { grid-column: 1; grid-row: 2; border-top: 2px solid var(--accent-neon); }
+    #code-panel { grid-column: 1; grid-row: 1; }
 }

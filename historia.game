@@ -10,7 +10,7 @@ game "Las Pruebas Elementales" {
 
     scene sala_central {
         background "bosque.jpg" # Simula una sala central
-        show prota at center
+        show prota at left
         dialogue prota "Estoy en una sala circular con tres puertas."
         dialogue prota "Una tiene el grabado de una llama. La otra, una ola. La del centro es de oro macizo."
 

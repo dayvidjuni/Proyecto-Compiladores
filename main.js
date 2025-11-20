@@ -31,26 +31,56 @@ function switchView(viewName) {
 }
 
 // --- EDITOR CON NÚMEROS DE LÍNEA ---
+// --- EDITOR SINCRONIZADO Y HIGHLIGHTER SIMPLE ---
 function initializeCodeEditor() {
     const scriptInput = document.getElementById('script-input');
+    const highlight = document.getElementById('syntax-highlight'); // Asegúrate que este ID exista en tu HTML
     const lineNumbers = document.getElementById('line-numbers');
     
     if (!scriptInput || !lineNumbers) return;
-    
-    function updateLineNumbers() {
-        const lines = scriptInput.value.split('\n').length;
-        let lineNumbersHTML = '';
-        for (let i = 1; i <= lines; i++) {
-            lineNumbersHTML += i + '\n';
+
+    // 1. Función para actualizar visualización y líneas
+    function updateEditor() {
+        const text = scriptInput.value;
+        
+        // A) Actualizar Números de Línea
+        const lines = text.split('\n').length;
+        // Generamos array de lineas, optimizado
+        lineNumbers.innerText = Array(lines).fill(0).map((_, i) => i + 1).join('\n');
+
+        // B) Actualizar Highlighter (Escape básico HTML para evitar inyecciones y bugs visuales)
+        let safeText = text.replace(/&/g, "&amp;")
+                           .replace(/</g, "&lt;")
+                           .replace(/>/g, "&gt;");
+        
+        // NOTA: Si tienes tu archivo syntax-highlighter.js aparte, 
+        // aquí es donde se aplicaría el coloreado. 
+        // Por ahora, para que se vea el texto, lo pasamos directo:
+        if(highlight) {
+             // Agregamos un espacio al final para evitar bug de scroll en la última línea
+            highlight.innerHTML = safeText + '<br>'; 
         }
-        lineNumbers.innerText = lineNumbersHTML;
     }
     
-    scriptInput.addEventListener('input', updateLineNumbers);
-    scriptInput.addEventListener('scroll', () => {
-        lineNumbers.scrollTop = scriptInput.scrollTop;
-    });
-    updateLineNumbers();
+    // 2. Función de Sincronización de Scroll (Scroll Sync)
+    function syncScroll() {
+        const scrollTop = scriptInput.scrollTop;
+        const scrollLeft = scriptInput.scrollLeft;
+        
+        // Movemos los números y el texto coloreado al unísono
+        lineNumbers.scrollTop = scrollTop;
+        if(highlight) {
+            highlight.scrollTop = scrollTop;
+            highlight.scrollLeft = scrollLeft;
+        }
+    }
+    
+    // 3. Event Listeners
+    scriptInput.addEventListener('input', updateEditor);
+    scriptInput.addEventListener('scroll', syncScroll);
+    
+    // Inicializar al cargar
+    updateEditor();
 }
 
 // --- GESTOR DE AUDIO ---
