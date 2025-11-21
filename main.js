@@ -203,18 +203,28 @@ const uiInterface = {
     characterLayerEl: document.getElementById('character-layer'),
 
     showCharacter: (spriteUrl, position) => {
-        const solutionStyle = 'mix-blend-mode: multiply;';
-        let imgId = `char-${position}`;
-        let imgEl = document.getElementById(imgId);
-        if (!imgEl) {
-            imgEl = document.createElement('img');
-            imgEl.id = imgId;
-            imgEl.style.cssText = ` 
-                position: absolute; bottom: 0; height: 90%; max-width: 40%;
-                transition: all 0.5s ease-out; ${solutionStyle}
-            `;
-            uiInterface.characterLayerEl.appendChild(imgEl);
-        }
+            // BORRA ESTA LÍNEA: const solutionStyle = 'mix-blend-mode: multiply;'; 
+            
+            let imgId = `char-${position}`;
+            let imgEl = document.getElementById(imgId);
+            if (!imgEl) {
+                imgEl = document.createElement('img');
+                imgEl.id = imgId;
+                
+                // Actualiza los estilos para quitar ${solutionStyle}
+                imgEl.style.cssText = ` 
+                    position: absolute;
+                    bottom: 0;
+                    height: 90%;
+                    max-width: 40%;
+                    transition: all 0.5s ease-out;
+                    /* mix-blend-mode: multiply;  <-- ELIMINADO */
+                    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); /* Opcional: Añade una sombra bonita alrededor */
+                `;
+                uiInterface.characterLayerEl.appendChild(imgEl);
+            }
+        
+        // ... resto del código de posición ...
         
         if (position === 'left') { imgEl.style.transform = 'translateX(0%)'; imgEl.style.left = '5%'; }
         else if (position === 'center') { imgEl.style.transform = 'translateX(-50%)'; imgEl.style.left = '50%'; }
